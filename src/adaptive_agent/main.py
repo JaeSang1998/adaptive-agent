@@ -235,6 +235,10 @@ def _repl(
             user_input = input(_PROMPT).strip()
         except EOFError:
             break
+        except KeyboardInterrupt:
+            # 입력 prompt 에서의 Ctrl+C 는 종료
+            console.print("\n종료합니다.")
+            break
 
         if not user_input:
             continue
@@ -246,7 +250,13 @@ def _repl(
             continue
 
         console.print()
-        response = agent.handle_user_input(user_input)
+        try:
+            response = agent.handle_user_input(user_input)
+        except KeyboardInterrupt:
+            # 작업 중 Ctrl+C 는 현재 task 만 중단 — REPL 은 계속.
+            # 다음 user input 시 새 turn 으로 진행 (recent_actions 는 reset_step 에서 clear 됨).
+            console.print("\n[yellow]현재 작업을 중단했습니다. 다른 요청을 입력하세요. (종료: Ctrl+C 한 번 더 또는 'exit')[/yellow]\n")
+            continue
 
         if response:
             console.print(f"\n{response}\n")

@@ -82,6 +82,10 @@ Stage 2: Sliding Window (비용 0)
 - `src/adaptive_agent/agent/core.py`: `_run_loop()` 매 step 시작 시 호출
 - `session.summary` 필드 제거 (LLM 요약이 없으므로 불필요)
 
+## 전제
+
+- **`config.llm.num_ctx ≥ token_budget`** — `num_ctx` 가 token_budget 보다 작으면 우리 compaction 이 동작하기 전에 Ollama 가 silent truncation. 기본값 `num_ctx=131072` 가 token_budget=128_000 를 cover. 사용자가 `num_ctx` 를 낮추면 token_budget 도 같이 낮춰야 한다.
+
 ## 참고
 
 - JetBrains Research (2025): "Efficient Context Management for Code-Generation Agents"

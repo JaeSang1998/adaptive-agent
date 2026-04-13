@@ -172,6 +172,9 @@ class Session:
 
     def reset_step(self) -> None:
         self.current_step = 0
+        # user turn 전환 시 stuck 검출 윈도우도 초기화. 이전 turn 의 도구 호출 history
+        # 가 다음 turn 에 잘못 stuck 으로 잡히는 false-positive 방지.
+        self.recent_actions.clear()
 
     def increment_step(self) -> int:
         self.current_step += 1

@@ -76,7 +76,12 @@ class ToolRunner:
         self._timeout = timeout
 
     def run(self, source_code: str, input_data: dict[str, Any]) -> RunResult:
-        """도구 코드를 임시 파일에 쓰고 subprocess로 실행."""
+        """도구 코드를 임시 파일에 쓰고 subprocess로 실행.
+
+        KeyboardInterrupt 시 child 를 명시적으로 kill 후 re-raise — REPL 이
+        중단을 잡아 정상 복귀할 수 있도록 한다. (subprocess.run 의 묵시적
+        cleanup 에 의존하지 않고 명시적 신호 처리)
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             tool_path = Path(tmpdir) / "tool.py"
             wrapper_path = Path(tmpdir) / "wrapper.py"
@@ -84,30 +89,41 @@ class ToolRunner:
             tool_path.write_text(source_code, encoding="utf-8")
             wrapper_path.write_text(_WRAPPER_TEMPLATE, encoding="utf-8")
 
+            popen = subprocess.Popen(
+                [sys.executable, str(wrapper_path), str(tool_path)],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                cwd=tmpdir,
+            )
             try:
-                proc = subprocess.run(
-                    [sys.executable, str(wrapper_path), str(tool_path)],
+                stdout_raw, stderr_raw = popen.communicate(
                     input=json.dumps(input_data, ensure_ascii=False),
-                    capture_output=True,
-                    text=True,
                     timeout=self._timeout,
-                    cwd=tmpdir,
                 )
             except subprocess.TimeoutExpired:
+                popen.kill()
+                popen.wait()
                 return RunResult(
                     success=False,
                     error=format_error(ErrorCode.TIMEOUT, f"실행 시간 초과 ({self._timeout}초)"),
                 )
+            except KeyboardInterrupt:
+                popen.kill()
+                popen.wait()
+                raise
 
-            if proc.returncode != 0:
-                stderr = proc.stderr.strip()
-                classified = _classify_runtime_error(stderr)
+            returncode = popen.returncode
+            if returncode != 0:
+                stderr_clean = (stderr_raw or "").strip()
+                classified = _classify_runtime_error(stderr_clean)
                 return RunResult(
                     success=False,
-                    error=f"[{classified}] {stderr}" if stderr else f"종료 코드: {proc.returncode}",
+                    error=f"[{classified}] {stderr_clean}" if stderr_clean else f"종료 코드: {returncode}",
                 )
 
-            stdout = proc.stdout.strip()
+            stdout = (stdout_raw or "").strip()
             if not stdout:
                 return RunResult(success=True, output="{}", parsed_output={})
 

@@ -3,7 +3,7 @@ llm:
   model: "gemma4:26b"
   temperature: 0.0
   max_tokens: 8192
-  num_ctx: 32768                    # Ollama context window. 하드웨어에 맞게 조절.
+  num_ctx: 131072                   # Ollama context window. gemma4:26b 256K 활용 (ADR-001 token_budget=128K 정합). 권장 메모리 ≥ 48GB. 작은 메모리에서는 32768 등으로 낮춰도 됨.
   enable_native_tools: false      # native tool calling 이 선호 경로이나 default 모델 이슈 (ADR-004) 로 현재는 prompt-based 기본. 다른 모델 사용 시 true 로 바꿔 enable.
   request_timeout_seconds: 120
   planner_max_tokens: 4096
