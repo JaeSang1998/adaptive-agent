@@ -71,17 +71,20 @@ cp config.example.yaml ~/.adaptive-agent/config.yaml
 ### 실행
 
 ```bash
-adaptive-agent                # REPL 모드 (CLI 진입점)
+uv run adaptive-agent         # REPL 모드 (CLI 진입점)
 /tools                        # REPL 내에서 등록된 도구 목록
 exit                          # 종료
 ```
 
+> `uv sync` 는 `.venv` 를 생성만 하고 활성화는 하지 않습니다.
+> `uv run <cmd>` 로 실행하거나, `source .venv/bin/activate` 후 `adaptive-agent` 를 직접 호출하세요.
+
 ### 테스트 · 평가
 
 ```bash
-pytest                                  # 단위·통합 테스트
-python -m eval                          # 전체 시나리오 실행
-python -m eval --filter csv_analysis    # 단일 시나리오
+uv run pytest                                  # 단위·통합 테스트
+uv run python -m eval                          # 전체 시나리오 실행
+uv run python -m eval --filter csv_analysis    # 단일 시나리오
 ```
 
 ---
