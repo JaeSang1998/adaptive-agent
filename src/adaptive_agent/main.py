@@ -49,13 +49,15 @@ _session_approved: set[str] = set()
 
 def _on_approval(tool_name: str, input_data: dict[str, Any]) -> bool:
     """사용자 승인 콜백. 위험한 built-in 도구 실행 전에만 호출."""
-    if tool_name in _session_approved:
+    risk = input_data.get("_risk", "normal") if tool_name == "run_bash" else "normal"
+
+    # warn-level run_bash 는 session 캐시 우회 — 매번 fresh approval.
+    if tool_name in _session_approved and risk == "normal":
         return True
 
     detail = ""
     if tool_name == "run_bash":
         command = input_data.get("command", "")
-        risk = input_data.get("_risk", "normal")
         reason = input_data.get("_risk_reason")
         if risk == "warn":
             detail = f" → ⚠️ 주의({reason}): {command}"
@@ -74,6 +76,10 @@ def _on_approval(tool_name: str, input_data: dict[str, Any]) -> bool:
         return False
 
     if answer in ("a", "always"):
+        # warn-level 은 'a' 입력해도 캐시 안 함 — 매번 확인.
+        if risk == "warn":
+            console.print("    [yellow]⚠ warn-level 명령은 세션 캐시 제외 — 매번 확인합니다.[/yellow]")
+            return True
         _session_approved.add(tool_name)
         console.print(f"    [dim]'{tool_name}' 이 세션 동안 자동 승인됩니다.[/dim]")
         return True

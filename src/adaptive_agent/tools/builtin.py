@@ -170,6 +170,10 @@ def _glob_search(input_data: dict[str, Any]) -> ToolResult:
     if not pattern:
         return ToolResult(tool_name="glob_search", success=False, error=format_error(ErrorCode.MISSING_PARAM, "'pattern' 파라미터가 필요합니다."))
 
+    # `..` 패턴은 root 밖으로 탈출 가능 (`**/../../etc/passwd` 등) → 차단.
+    if ".." in Path(pattern).parts:
+        return ToolResult(tool_name="glob_search", success=False, error=format_error(ErrorCode.VALIDATION_FAILED, "패턴에 '..' 사용 불가 (root 밖 탈출 방지)."))
+
     root_path = Path(root)
     if not root_path.is_dir():
         return ToolResult(tool_name="glob_search", success=False, error=format_error(ErrorCode.NOT_FOUND, f"디렉토리를 찾을 수 없습니다: {root}"))
@@ -324,26 +328,42 @@ def _looks_like_symbol_def(line: str) -> bool:
 
 # 3-tier 위험 분류: deny(자동 차단), warn(경고 후 사용자 판단), normal(일반 승인)
 # primary defense는 approval callback. 패턴 매칭은 secondary defense.
+#
+# 우회 한계 (의도적으로 수용):
+#   regex 기반 deny-list 는 obfuscation 우회 가능 — `$(echo rm) -rf /tmp`,
+#   `RM=rm; $RM -rf /tmp`, base64 디코드 후 실행 등. 따라서 patten 매칭은
+#   "사용자 실수 차단" 용이고, "악의적 사용자" 는 approval callback (사람
+#   판단) 이 막는 layered 정책이다. 또한 warn 이상은 session cache 에서 제외해
+#   매번 fresh approval 강제 (main.py:_on_approval).
 
 _DENY_PATTERNS: list[tuple[str, str]] = [
-    (r"rm\s+(-[rf]+\s+)*[/~]", "파일 시스템 삭제"),
-    (r"curl.*\|\s*(bash|sh)", "원격 스크립트 실행"),
+    (r"\brm\b\s+(-[rfRI]+\s+)*[/~]", "파일 시스템 삭제"),
+    (r"\brm\b\s+(-[rfRI]+\s+)*\$", "변수/치환 인자로 rm"),
+    (r"curl[^|]*\|\s*(bash|sh|zsh)\b", "원격 스크립트 실행"),
+    (r"wget[^|]*\|\s*(bash|sh|zsh)\b", "원격 스크립트 실행"),
     (r">\s*/dev/", "디바이스 직접 쓰기"),
-    (r"chmod\s+777", "전체 권한 부여"),
-    (r"mkfs\.", "파일시스템 포맷"),
-    (r"dd\s+if=", "블록 디바이스 조작"),
-    (r":(){ :\|:& };:", "fork bomb"),
+    (r"chmod\s+(-R\s+)?[0-7]*7[0-7]*7[0-7]*7", "전체 권한 부여"),
+    (r"\bmkfs\.", "파일시스템 포맷"),
+    (r"\bdd\s+if=", "블록 디바이스 조작"),
+    (r":\(\)\s*\{[^}]*:\|:[^}]*\}", "fork bomb"),
+    (r"base64\s+-d.*\|\s*(bash|sh)", "base64 디코드 후 실행"),
+    (r"echo\s+[^|]*\|\s*base64\s+-d\s*\|\s*(bash|sh)", "base64 디코드 후 실행"),
 ]
 
 _WARN_PATTERNS: list[tuple[str, str]] = [
-    (r"python[23]?\s+-c\s+", "인터프리터 코드 실행"),
-    (r"perl\s+-e\s+", "인터프리터 코드 실행"),
-    (r"ruby\s+-e\s+", "인터프리터 코드 실행"),
-    (r"node\s+-e\s+", "인터프리터 코드 실행"),
-    (r"bash\s+-c\s+", "셸 내 셸 실행"),
-    (r"sudo\s+", "권한 상승"),
+    (r"\bpython[23]?\s+-c\s+", "인터프리터 코드 실행"),
+    (r"\bperl\s+-e\s+", "인터프리터 코드 실행"),
+    (r"\bruby\s+-e\s+", "인터프리터 코드 실행"),
+    (r"\bnode\s+-e\s+", "인터프리터 코드 실행"),
+    (r"\bbash\s+-c\s+", "셸 내 셸 실행"),
+    (r"\bsh\s+-c\s+", "셸 내 셸 실행"),
+    (r"\bsudo\b", "권한 상승"),
     (r">\s*/etc/", "시스템 설정 덮어쓰기"),
     (r"\beval\s+", "동적 명령 실행"),
+    (r"\$\([^)]*\b(rm|chmod|chown|kill|dd|mkfs)\b", "치환 안에 위험 명령"),
+    (r"\bkill(all)?\s+-9\b", "강제 프로세스 종료"),
+    # rm 이 deny 패턴에 안 잡혔지만 (절대경로 아님) 그래도 위험 가능
+    (r"\brm\s+(-[rfRI]+\s+)*\w", "파일 삭제 (상대경로)"),
 ]
 
 
@@ -352,8 +372,8 @@ def classify_command_risk(command: str) -> tuple[str, str | None]:
 
     Returns:
         ("deny", "이유") — 자동 차단, 실행 불가
-        ("warn", "이유") — 차단 안 하지만 approval 시 경고 표시
-        ("normal", None)  — 일반 승인
+        ("warn", "이유") — 차단 안 하지만 approval 시 경고 + session 캐시 제외
+        ("normal", None)  — 일반 승인 (한 번 a 누르면 세션 캐시 가능)
     """
     for pattern, reason in _DENY_PATTERNS:
         if re.search(pattern, command):
