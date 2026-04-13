@@ -27,7 +27,7 @@ from adaptive_agent.agent.core.repair import RepairHandler
 from adaptive_agent.agent.core.workspace import workspace_context
 from adaptive_agent.agent.events import EventType
 from adaptive_agent.agent.meta_tools import META_TOOL_NAMES
-from adaptive_agent.agent.planner import Planner, PlannerDecision
+from adaptive_agent.agent.planner import Planner
 from adaptive_agent.agent.session import Session, ToolResult
 from adaptive_agent.llm.client import LLMClientProtocol
 from adaptive_agent.tools.builder import ToolBuilder
@@ -165,7 +165,13 @@ class AgentCore:
         tool_descs, tool_notices = self._registry.get_tool_descriptions()
         ws_context = workspace_context(self._session)
 
-        decision = self._plan_with_fallback(tool_descs, tool_notices, ws_context)
+        decision = self._planner.decide(
+            self._session.get_context_messages(),
+            tool_descs,
+            tool_notices=tool_notices,
+            plan=self._session.plan or None,
+            workspace_context=ws_context,
+        )
 
         # 텍스트 응답 = 루프 종료
         if decision.text is not None:
@@ -209,22 +215,6 @@ class AgentCore:
 
         self._execute_tool(tool_name, input_data)
         return None
-
-    def _plan_with_fallback(
-        self,
-        tool_descs: list[dict[str, Any]],
-        tool_notices: list[str],
-        ws_context: str,
-    ) -> PlannerDecision:
-        """planner 호출. timeout 은 상위 step 예외 처리로 propagate."""
-        context = self._session.get_context_messages()
-        return self._planner.decide(
-            context,
-            tool_descs,
-            tool_notices=tool_notices,
-            plan=self._session.plan or None,
-            workspace_context=ws_context,
-        )
 
     def _execute_tool(self, tool_name: str, input_data: dict[str, Any]) -> None:
         """tool 실행. 결과를 세션에 추가.
