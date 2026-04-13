@@ -98,11 +98,3 @@ system prompt 가 아니라 Ollama tools 배열의 schema description 에 `$ref`
 1. gemma4 (또는 후속 버전) 의 multi-turn tool-result empty content 이슈가 Ollama 또는 모델 측에서 fix 되어 동일 eval body 로 재현 안 됨.
 2. 대체 모델 (`gemma4:31b`, `qwen3.5:9b`, `qwen3:4b` 등) 에서 train/test split 재검증 후 native 안정성 확인.
 3. Builder/Repair 까지 native tool calling 으로 확장하는 설계 재개 시 (현재 README L674 의 향후 개선 항목) 동시에 default 반전.
-
-## 참고
-
-- README §4.2 LLM Layer ([README.md](../../README.md))
-- `planner.py` `_to_ollama_tools` ([src/adaptive_agent/agent/planner.py](../../src/adaptive_agent/agent/planner.py))
-- `client.py` capability detection ([src/adaptive_agent/llm/client.py](../../src/adaptive_agent/llm/client.py))
-- `optim/eval_iter7_native_off.json` (10/10 smoke 실증)
-- `optim/log.jsonl` iter1 (prompt-based 경로의 train 100% commit)
