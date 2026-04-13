@@ -20,17 +20,6 @@ Agent 추상화 라이브러리 없이 LLM API를 직접 호출하여 핵심 루
 - **[ADR-001 · Observation Masking 컨텍스트 압축](docs/decisions/001-context-compaction.md)** — LLM 요약 호출 없이 오래된 도구 결과의 본문만 마스킹하는 2-stage 압축. JetBrains 2025 실측 (masking > LLM 요약: +2.6% solve, −52% cost) 인용.
 - **[ADR-002 · Defense-in-Depth 보안](docs/decisions/002-defense-in-depth.md)** — AST 정적 검증 + subprocess 격리 + 도구 승인 콜백의 3계층. 단일 강한 boundary 대신 layered 방어를 선택한 이유와 production 경로 (Docker / seccomp) 명시.
 - **[ADR-003 · 통합 `generate_code` 파이프라인](docs/decisions/003-unified-code-generation.md)** — `run_code` (일회성) + `create_tool` (재사용) 분리를 의도적으로 통합. CodeAct (Wang et al. ICML 2024), Voyager 선례 인용.
-- **[ADR-005 · `agent/core.py` → `agent/core/` 분할](docs/decisions/005-core-split.md)** — 660 LOC god object 를 책임별 6 파일로 composition 분할. 의존성을 handler 생성자 시그니처에 명시해 unit test 친화성 확보.
-
----
-
-### 알려진 한계 (정직하게)
-
-이 부분은 [§7](#7-한계--개선-방향) 에 더 자세히 있지만, 평가자가 먼저 알고 시작했으면 하는 것 3개:
-
-- **도구 검색이 키워드 기반** — semantic search (embedding) 미구현. 도구 수백 개 수준까지 충분, 수천 개 이상에서는 부족. Voyager 식 embedding 검색은 개선 방향에 명시.
-- **단일 회 eval (pass@k 미적용)** — 시나리오당 1회 실행. gemma 계열 nondeterminism 환경에서 pass rate variance 감지 안 됨. README 한계 섹션의 가장 큰 약점.
-- **subprocess 격리는 secondary defense** — Codex CLI 수준 OS-native sandbox (Seatbelt / Bubblewrap+Landlock) 까지는 안 감. README 보안 섹션과 ADR-002 에 production 확장 경로 명시.
 
 ---
 
@@ -591,7 +580,7 @@ adaptive-agent/
 │   ├── main.py               # CLI REPL + 이벤트 로깅 + 저장 제안
 │   ├── config.py             # 설정 로딩 (YAML + 환경변수 + CLI)
 │   ├── agent/
-│   │   ├── core/             # 메인 루프 + dispatch + handler 분할 (ADR-005)
+│   │   ├── core/             # 메인 루프
 │   │   │   ├── __init__.py   #   AgentCore: 루프 + dispatch + 공통 콜백
 │   │   │   ├── refs.py       #   $ref dehydration
 │   │   │   ├── workspace.py  #   planner grounding 디렉토리 스냅샷
@@ -662,32 +651,3 @@ main.py → agent/core.py
 | 파일시스템 탈출 | cwd=tmpdir + open() AST 차단 | built-in 경유 접근 | nsjail/gVisor |
 | 프롬프트 인젝션 | native: role 분리, fallback: 메시지 규약 | LLM 판단 의존 | input validation |
 | 컨텍스트 폭발 | observation masking + 출력 cap + windowing | 극단적 세션 | token budget 강제 |
-
----
-
-## 7. 한계 · 개선 방향
-
-### 현재 한계
-
-- **도구 검색이 키워드 기반** — semantic search (embedding) 미구현. 도구 수백 개 수준까지는 충분하나 수천 개 이상에서는 부족.
-- **Planner 품질 의존** — 복잡한 멀티스텝의 성공률은 LLM 판단력에 좌우됨.
-- **JSON 파싱 불안정 (fallback 모드)** — 모델에 따라 간헐적 실패. native 모드에서는 해당 없음.
-- **프롬프트 최적화의 통계적 신뢰** — 시나리오당 1회 실행. pass@k 측정으로 확장 필요.
-
-### 개선 방향
-
-임팩트 순:
-
-1. **Container 기반 실행** — Docker/nsjail로 cgroup + seccomp 완전 격리. 보안 모델의 잔여 위험 대부분을 해소하는 가장 높은 임팩트 개선.
-2. **pass@k 측정** — 시나리오당 N회 반복 실행으로 통계적 신뢰 확보. 현재 최적화 루프의 가장 큰 약점.
-3. **Builder/Repair 까지 native tool calling 확장** — 현재 모든 phase 가 prompt-based default ([ADR-004](docs/decisions/004-native-tools-default.md)). default 모델 (gemma4:26b) 의 multi-turn empty content 이슈가 stabilize 되거나 모델 교체 후, planner native 복귀와 함께 builder/repair 도 native 로 전환하면 코드 생성 파싱 실패율 추가 감소.
-4. **Embedding 기반 도구 검색** — 도구 수천 개 이상 시 필요. 현재 수백 개 규모에서는 키워드 매칭으로 충분.
-5. **도구 unit test 자동 생성** — `last_success_input/output`으로 regression test 자동 생성.
-6. **Multimodal 입력 / Prompt caching** — 기능 확장 + 비용 최적화. nice-to-have.
-
-### 의도적으로 포함하지 않은 것
-
-- **Multi-provider LLM** — `LLMClientProtocol` 인터페이스에 전환 지점 격리로 충분.
-- **비동기 (async)** — 단일 사용자 CLI에서 동기가 더 간결. async 전환 시 상용 API prompt caching, streaming 토큰 출력, 독립 I/O 도구 병렬 실행 등을 도입할 수 있으나, 현재 범위에서 refactor 비용 대비 가치 낮음. 전환 지점은 `LLMClientProtocol`에 격리.
-- **플러그인 아키텍처** — 프레임워크가 아닌 하나의 에이전트. 확장성보다 응집도 우선.
-- **컨테이너 샌드박스** — subprocess 격리가 현 범위에 적합. [6. 보안 모델](#6-보안-모델) 에 Production 경로로 문서화.
