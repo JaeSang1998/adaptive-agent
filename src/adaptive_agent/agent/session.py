@@ -44,7 +44,8 @@ class Session:
     original_request: str = ""  # 세션 첫 사용자 메시지 (불변 보존, compaction에서도 유실 안 됨)
     native_tools: bool = False  # native tool calling 활성 여부
     # 단일 source: insertion-order 가 최신 순이며 path 또는 synthetic key 로 lookup.
-    # `get_last_observation()` 은 마지막 항목, `get_observation_by_path()` 는 path 기반 조회.
+    # `get_observation_by_path()` 는 path 기반 조회. record_observation 은 LRU 처럼
+    # 같은 key 재기록 시 dict 끝으로 이동.
     observations: dict[str, dict[str, Any]] = field(default_factory=lambda: {})
 
     def add_user_message(self, content: str) -> None:
@@ -134,11 +135,6 @@ class Session:
         if key in self.observations:
             del self.observations[key]
         self.observations[key] = observation
-
-    def get_last_observation(self) -> dict[str, Any] | None:
-        if not self.observations:
-            return None
-        return next(reversed(self.observations.values()))
 
     def get_observation_by_path(self, path: str) -> dict[str, Any] | None:
         """path-keyed observation lookup. $ref resolver 가 사용."""

@@ -148,9 +148,6 @@ class ToolRegistry:
             })
         return results, total
 
-    def is_builtin(self, name: str) -> bool:
-        return name in self._builtin
-
     def is_observation_producer(self, name: str) -> bool:
         """`observations` 에 결과를 누적할 read-only 도구인지.
 

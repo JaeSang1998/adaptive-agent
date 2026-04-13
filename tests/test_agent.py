@@ -339,17 +339,26 @@ class TestStuckDetection:
         assert result is True
 
 
-class TestResolveToolName:
-    """_resolve_tool_name 단위 테스트."""
+class TestToolNameCollision:
+    """generate_code 호출 시 이름 충돌 정책 (silent rename 대신 fail → 재시도)."""
 
-    def test_no_collision(self):
-        agent, _session = TestAgentCore()._make_agent([])
-        assert agent._resolve_tool_name("brand_new") == "brand_new"
+    def test_collision_fails_with_recovery_hint(self):
+        """이미 존재하는 이름으로 generate_code 호출 시 fail 메시지가 세션에 기록."""
+        responses = [
+            json.dumps({
+                "tool": "generate_code",
+                "input": {"tool_name": "existing_tool", "description": "재사용 시도"},
+            }),
+            "다른 이름으로 진행하겠습니다.",
+        ]
+        agent, session = TestAgentCore()._make_agent(responses)
+        agent._registry.register_session_tool("existing_tool", "code", {})
 
-    def test_collision_appends_suffix(self):
-        agent, _session = TestAgentCore()._make_agent([])
-        agent._registry.register_session_tool("existing", "code", {})
-        assert agent._resolve_tool_name("existing") == "existing_2"
+        result = agent.handle_user_input("동일 이름 도구 생성")
+        assert result is not None
+        all_content = " ".join(str(m.get("content", "")) for m in session.messages)
+        assert "existing_tool" in all_content
+        assert "이미 존재" in all_content
 
 
 class TestClassifyRuntimeError:

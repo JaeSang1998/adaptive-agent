@@ -20,6 +20,7 @@ Agent 추상화 라이브러리 없이 LLM API를 직접 호출하여 핵심 루
 - **[ADR-001 · Observation Masking 컨텍스트 압축](docs/decisions/001-context-compaction.md)** — LLM 요약 호출 없이 오래된 도구 결과의 본문만 마스킹하는 2-stage 압축. JetBrains 2025 실측 (masking > LLM 요약: +2.6% solve, −52% cost) 인용.
 - **[ADR-002 · Defense-in-Depth 보안](docs/decisions/002-defense-in-depth.md)** — AST 정적 검증 + subprocess 격리 + 도구 승인 콜백의 3계층. 단일 강한 boundary 대신 layered 방어를 선택한 이유와 production 경로 (Docker / seccomp) 명시.
 - **[ADR-003 · 통합 `generate_code` 파이프라인](docs/decisions/003-unified-code-generation.md)** — `run_code` (일회성) + `create_tool` (재사용) 분리를 의도적으로 통합. CodeAct (Wang et al. ICML 2024), Voyager 선례 인용.
+- **[ADR-005 · `agent/core.py` → `agent/core/` 분할](docs/decisions/005-core-split.md)** — 660 LOC god object 를 책임별 6 파일로 composition 분할. 의존성을 handler 생성자 시그니처에 명시해 unit test 친화성 확보.
 
 ---
 
@@ -590,11 +591,19 @@ adaptive-agent/
 │   ├── main.py               # CLI REPL + 이벤트 로깅 + 저장 제안
 │   ├── config.py             # 설정 로딩 (YAML + 환경변수 + CLI)
 │   ├── agent/
-│   │   ├── core.py           # 상태기계 오케스트레이터
+│   │   ├── core/             # 메인 루프 + dispatch + handler 분할 (ADR-005)
+│   │   │   ├── __init__.py   #   AgentCore: 루프 + dispatch + 공통 콜백
+│   │   │   ├── refs.py       #   $ref dehydration
+│   │   │   ├── workspace.py  #   planner grounding 디렉토리 스냅샷
+│   │   │   ├── codegen.py    #   CodeGenHandler (generate_code 파이프라인)
+│   │   │   ├── repair.py     #   RepairHandler (repair_tool 루프)
+│   │   │   └── meta.py       #   MetaHandlers (think / ask_user / update_plan / 일반 도구)
 │   │   ├── planner.py        # LLM 행동 결정
 │   │   ├── session.py        # 대화 히스토리 + 도구 성공 추적
 │   │   ├── compaction.py     # Observation masking 컨텍스트 압축
-│   │   └── events.py         # JSONL 이벤트 로깅
+│   │   ├── meta_tools.py     # 메타 도구 schema / META_TOOL_NAMES
+│   │   └── events.py         # JSONL 이벤트 로깅 + EventType Literal
+│   ├── limits.py             # truncation / safe_int 단일 출처
 │   ├── llm/
 │   │   ├── client.py         # LLMClientProtocol + OllamaClient
 │   │   ├── prompts.py        # 역할별 프롬프트 템플릿
