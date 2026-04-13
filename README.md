@@ -17,7 +17,7 @@ Agent 추상화 라이브러리 없이 LLM API를 직접 호출하여 핵심 루
 
 대안을 검토한 뒤 의도적으로 선택한 결정 3개. 각 ADR 에 trade-off 와 인용 근거가 있다.
 
-- **[ADR-001 · Observation Masking 컨텍스트 압축](docs/decisions/001-context-compaction.md)** — LLM 요약 호출 없이 오래된 도구 결과의 본문만 마스킹하는 2-stage 압축. JetBrains 2025 실측 (masking > LLM 요약: +2.6% solve, −52% cost) 인용.
+- **[ADR-001 · Observation Masking 컨텍스트 압축](docs/decisions/001-context-compaction.md)** — 오래된 도구 결과의 본문만 마스킹하는 단일 primitive. LLM 요약 대비 JetBrains 2025 실측 (masking > LLM 요약: +2.6% solve, −52% cost) 인용.
 - **[ADR-002 · Defense-in-Depth 보안](docs/decisions/002-defense-in-depth.md)** — AST 정적 검증 + subprocess 격리 + 도구 승인 콜백의 3계층. 단일 강한 boundary 대신 layered 방어를 선택한 이유와 production 경로 (Docker / seccomp) 명시.
 - **[ADR-003 · 통합 `generate_code` 파이프라인](docs/decisions/003-unified-code-generation.md)** — `run_code` (일회성) + `create_tool` (재사용) 분리를 의도적으로 통합. CodeAct (Wang et al. ICML 2024), Voyager 선례 인용.
 
@@ -262,7 +262,7 @@ Agent의 모든 의사결정이 LLM 호출에 의존합니다. 호출 안정성(
 <summary><b>선택</b></summary>
 
 - **단일 provider (Ollama)** — 현 범위에서 multi-provider 추상화는 복잡성만 추가. 전환 지점은 `LLMClientProtocol` 인터페이스 한 곳에 격리.
-- **Native tool calling + prompt-based fallback 이중 경로** — Ollama v0.20.3+의 native tool calling을 우선 사용하되, 미지원 모델에서 자동 fallback. 첫 호출에서 capability auto-detection. _현재 default 모델 (`gemma4:26b`) 의 multi-turn empty content 이슈로 기본값은 prompt-based, native 는 opt-in. 다른 모델 사용 시 env/config 로 즉시 enable. 자세히는 [ADR-004](docs/decisions/004-native-tools-default.md)._
+- **Native tool calling + prompt-based fallback 이중 경로** — Ollama v0.20.3+의 native tool calling을 우선 사용하되, 미지원 모델에서 자동 fallback. 첫 호출에서 capability auto-detection.
 - **Phase별 token/timeout 분리** — planner(4096 tok / 90s), code(8192 tok / 120s), repair(8192 tok / 120s). 단일 설정 대비 P99 latency 단축.
 - **다단계 JSON 파싱** — 전체 파싱 → 코드블록 추출 → 중첩 JSON 추출 → `json_repair` healing. fallback 경로에서 다양한 모델 출력을 수용.
 </details>
@@ -270,13 +270,13 @@ Agent의 모든 의사결정이 LLM 호출에 의존합니다. 호출 안정성(
 <details>
 <summary><b>결과</b></summary>
 
-native 모드 (opt-in) 활성 시 도구 결과가 `role: "tool"` + `tool_name`으로 전달, 사용자 메시지와 혼동 0. capability detection은 세션 시작 시 1회만 수행. **현재 default (prompt-based) 에서는 §한계 의 role 오염 참고** — gemma4:26b 의 multi-turn empty content 이슈로 [ADR-004](docs/decisions/004-native-tools-default.md) 에 따라 prompt-based 가 default.
+native 모드에서 도구 결과가 `role: "tool"` + `tool_name`으로 전달, 사용자 메시지와 혼동 0. capability detection은 세션 시작 시 1회만 수행.
 </details>
 
 <details>
 <summary><b>한계</b></summary>
 
-fallback 모드에서는 도구 결과를 `role: "user"`로 보내고 접두사 `[도구 ...]`로만 구분합니다. 이는 **구조적 role 오염**으로, 도구 결과에 악의적 텍스트가 포함되면 사용자 메시지로 오인될 수 있습니다. native tool calling 모드에서는 role이 완전 분리되어 이 문제가 없으므로, 가능하면 native 모드 사용을 권장합니다 ([ADR-004](docs/decisions/004-native-tools-default.md) 참고 — 현재 default 모델은 일시적 예외). `json_repair` 외부 의존성은 이 fallback 안정성을 위한 유일한 비순정 의존성.
+fallback 모드에서는 도구 결과를 `role: "user"`로 보내고 접두사 `[도구 ...]`로만 구분합니다. 이는 **구조적 role 오염**으로, 도구 결과에 악의적 텍스트가 포함되면 사용자 메시지로 오인될 수 있습니다. native tool calling 모드에서는 role이 완전 분리되어 이 문제가 없으므로, 가능하면 native 모드 사용을 권장합니다. `json_repair` 외부 의존성은 이 fallback 안정성을 위한 유일한 비순정 의존성.
 </details>
 
 <details>

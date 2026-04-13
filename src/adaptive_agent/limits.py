@@ -5,12 +5,11 @@
 
 호출 layer 별 책임:
   - tools/runner.py    : subprocess stdout 전체 cap (RUNNER_OUTPUT_BYTES)
-  - agent/session.py   : 메시지 히스토리에 포함될 도구 결과 cap (SESSION_RESULT_CHARS)
-  - agent/compaction.py: sliding window 시 첫 메시지 보존 한계 (FIRST_MSG_PRESERVE_CHARS)
+  - agent/session.py   : 메시지 히스토리에 포함될 도구 결과 hard safety net (SESSION_RESULT_CHARS)
   - tools/builtin.py   : grep 결과 라인 수 cap (GREP_MAX_RESULTS), glob 파일 수 cap
 
-원칙: 안쪽 (runner) 가 가장 크고, 바깥쪽 (session, compaction) 으로 갈수록
-좁아진다. 사용자가 보는 console 출력은 다시 main.py 가 따로 자른다.
+원칙: 안쪽 (runner) 가 가장 크고, 바깥쪽 (session) 이 안전망. context 동적 압축은
+agent/compaction.py 의 observation masking 만 사용 (multi-stage 폐지).
 """
 
 from __future__ import annotations
@@ -23,15 +22,12 @@ RUNNER_OUTPUT_HEAD = 20_000  # truncate 시 앞쪽 보존
 RUNNER_OUTPUT_TAIL = 10_000  # truncate 시 뒤쪽 보존
 
 # ── Session message history ───────────────────────────────────────────
-# 도구 결과 메시지 1건의 cap. session.add_tool_result 가 사용. 4KB.
-# 큰 결과는 head 2K + ellipsis + tail 1K 형태로 보존.
-SESSION_RESULT_CHARS = 4_000
-SESSION_RESULT_HEAD = 2_000
-SESSION_RESULT_TAIL = 1_000
-
-# ── Compaction sliding window ─────────────────────────────────────────
-# sliding window stage 에서 첫 메시지 (original_request) 보존 한계.
-FIRST_MSG_PRESERVE_CHARS = 2_000
+# 도구 결과 메시지 1건의 hard safety net. num_ctx=131K 환경에서 일반 시나리오는
+# 거의 발동 안 함. 외부 워크로드의 100KB+ 단일 결과 같은 극단 케이스만 cap.
+# head + tail 형태로 보존하되 충분히 관대하게.
+SESSION_RESULT_CHARS = 12_000
+SESSION_RESULT_HEAD = 8_000
+SESSION_RESULT_TAIL = 4_000
 
 # ── Builtin tool result caps ──────────────────────────────────────────
 GREP_MAX_RESULTS = 200          # grep_search line cap

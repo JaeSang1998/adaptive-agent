@@ -1,118 +1,121 @@
-"""Observation masking 기반 컨텍스트 압축 테스트 (단일 compact API)."""
+"""Observation masking 단일 compact() 테스트.
 
-from adaptive_agent.agent.compaction import compact
+ADR-001 의 multi-stage 가 single-stage 로 정리된 후의 동작 검증:
+  - tool result body 만 마스킹, header 보존
+  - 최근 _KEEP_RECENT_FULL(5) 개는 원문 유지
+  - user/assistant/system 메시지는 건드리지 않음
+  - idempotent: 이미 마스킹된 메시지 재호출 시 동일 결과
+"""
+
+from adaptive_agent.agent.compaction import _KEEP_RECENT_FULL, compact
 from adaptive_agent.agent.session import Session
 
 
-class TestCompactNormal:
-    def test_no_op_when_under_budget(self):
-        """예산 이하면 아무것도 안 함."""
+def _make_tool_msg(idx: int, body: str = "원문결과") -> dict[str, str]:
+    return {"role": "user", "content": f"[도구 t{idx} 실행 성공]\n{body} {idx}"}
+
+
+class TestCompact:
+    def test_no_op_when_under_keep_threshold(self):
+        """tool result 가 _KEEP_RECENT_FULL 개 이하면 변경 없음."""
         session = Session()
-        session.add_user_message("짧은 메시지")
+        for i in range(_KEEP_RECENT_FULL):
+            session.messages.append(_make_tool_msg(i))
 
-        compact(session, token_budget=128_000)
+        compact(session)
 
-        assert session.messages[0]["content"] == "짧은 메시지"
+        for i, msg in enumerate(session.messages):
+            assert f"원문결과 {i}" in msg["content"]
+            assert "[결과 생략]" not in msg["content"]
 
     def test_masks_old_tool_results(self):
-        """Stage 1: 오래된 도구 결과의 본문이 마스킹되는지 확인."""
+        """오래된 tool result 본문은 마스킹, header 는 보존."""
         session = Session()
-        session.add_user_message("요청")
+        for i in range(8):
+            session.messages.append(_make_tool_msg(i))
+
+        compact(session)
+
+        # 처음 (8 - 5 = 3) 개 마스킹
         for i in range(3):
-            session.messages.append({
-                "role": "user",
-                "content": f"[도구 tool_{i} 실행 성공]\n{'x' * 3000}",
-            })
-        session.messages.append({
-            "role": "user",
-            "content": "[도구 tool_latest 실행 성공]\n최근 결과",
-        })
-
-        compact(session, token_budget=500)
-
-        # 오래된 도구 결과는 마스킹 (헤더 보존)
-        assert "[결과 생략]" in session.messages[1]["content"]
-        assert session.messages[1]["content"].startswith("[도구 tool_0 실행 성공]")
-        # 사용자 요청은 보존
-        assert session.messages[0]["content"] == "요청"
-        # 메시지 수 유지 (삭제 아님, 마스킹)
-        assert len(session.messages) == 5
-
-    def test_stage2_sliding_window_fallback(self):
-        """Stage 1 후에도 예산 초과 시 Stage 2(sliding window) 발동."""
-        session = Session()
-        for _ in range(20):
-            session.add_user_message("x" * 1000)
-            session.add_assistant_message("y" * 1000)
-
-        compact(session, token_budget=100)
-
-        # 첫 메시지 + 최근 6개 이하
-        assert len(session.messages) <= 7
+            content = session.messages[i]["content"]
+            assert "[결과 생략]" in content
+            assert content.startswith(f"[도구 t{i} 실행 성공]")
+            assert "원문결과" not in content
+        # 최근 5 개는 원문 유지
+        for i in range(3, 8):
+            assert f"원문결과 {i}" in session.messages[i]["content"]
 
     def test_preserves_user_and_assistant_messages(self):
-        """사용자/assistant 메시지는 마스킹 대상 아님."""
+        """user/assistant/system 메시지는 절대 건드리지 않음."""
         session = Session()
         session.messages = [
             {"role": "user", "content": "긴 사용자 메시지" * 100},
             {"role": "assistant", "content": "긴 응답" * 100},
-            {"role": "user", "content": "[도구 x 실행 성공]\n결과"},
-            {"role": "user", "content": "[도구 y 실행 성공]\n결과2"},
-            {"role": "user", "content": "[도구 z 실행 성공]\n최근결과"},
+            *[_make_tool_msg(i) for i in range(8)],
         ]
 
-        compact(session, token_budget=10)
+        compact(session)
 
         assert "사용자 메시지" in session.messages[0]["content"]
         assert "응답" in session.messages[1]["content"]
+        # 첫 번째 도구 결과 (index 2) 는 가장 오래된 것 → 마스킹 대상
+        assert "[결과 생략]" in session.messages[2]["content"]
 
-
-class TestCompactPlanner:
-    def test_no_op_when_few_messages(self):
-        """planner stage 는 메시지 수 limit 이하면 동작 안 함."""
+    def test_native_tool_role_messages_also_masked(self):
+        """role == 'tool' 형식 (native tool calling) 도 마스킹 대상."""
         session = Session()
-        for i in range(5):
-            session.add_user_message(f"msg_{i}")
-
-        compact(session, stage="planner")
-
-        # 5개 → limit(10) 이하 → 변경 없음
-        assert len(session.messages) == 5
-        assert session.messages[0]["content"] == "msg_0"
-
-    def test_masks_when_over_message_limit(self):
-        """planner stage 는 메시지가 limit 넘으면 오래된 도구 결과를 마스킹."""
-        session = Session()
-        session.add_user_message("요청")
-        for i in range(15):
+        for i in range(8):
             session.messages.append({
-                "role": "user",
-                "content": f"[도구 t{i} 실행 성공]\n원문결과 {i}",
-            })
-
-        compact(session, stage="planner")
-
-        # 마지막 1 개 보존, 나머지 14 개 마스킹
-        masked_count = sum(
-            1 for m in session.messages
-            if "[결과 생략]" in m.get("content", "")
-        )
-        assert masked_count == 14
-        assert "원문결과 14" in session.messages[-1]["content"]
-
-
-class TestCompactAggressive:
-    def test_aggressive_keeps_only_one_observation(self):
-        session = Session()
-        for i in range(5):
-            session.messages.append({
-                "role": "user",
+                "role": "tool",
+                "tool_name": f"t{i}",
                 "content": f"[도구 t{i} 실행 성공]\n원문 {i}",
             })
 
-        compact(session, stage="aggressive")
+        compact(session)
 
-        # 4 개 마스킹, 1 개 원문
-        masked = sum(1 for m in session.messages if "[결과 생략]" in m["content"])
-        assert masked == 4
-        assert "원문 4" in session.messages[-1]["content"]
+        # 첫 3 개 마스킹
+        for i in range(3):
+            assert "[결과 생략]" in session.messages[i]["content"]
+        for i in range(3, 8):
+            assert "원문" in session.messages[i]["content"]
+
+    def test_idempotent(self):
+        """이미 마스킹된 메시지에 compact 재호출 시 동일 결과 (header split 안전)."""
+        session = Session()
+        for i in range(8):
+            session.messages.append(_make_tool_msg(i))
+
+        compact(session)
+        snapshot = [dict(m) for m in session.messages]
+        compact(session)
+
+        assert session.messages == snapshot
+
+
+class TestObservationCap:
+    """`session.observations` 의 hard cap (`_MAX_OBSERVATIONS=100`) 검증.
+
+    $ref resolution fallback store 가 무한 grow 하지 않도록 oldest-evict.
+    typical 시나리오 (≤30 step) 에선 절대 발동 안 함.
+    """
+
+    def test_observations_evict_oldest_beyond_cap(self):
+        from adaptive_agent.agent.session import _MAX_OBSERVATIONS
+
+        session = Session()
+        # cap+5 개를 기록
+        for i in range(_MAX_OBSERVATIONS + 5):
+            session.record_observation(
+                tool_name="read_file",
+                input_data={"path": f"f{i}.txt"},
+                output=f"content {i}",
+            )
+
+        assert len(session.observations) == _MAX_OBSERVATIONS
+        # 가장 오래된 5개 (f0~f4) 는 evict 되어 lookup 실패
+        for i in range(5):
+            assert session.get_observation_by_path(f"f{i}.txt") is None
+        # 최신 cap 개는 유지
+        for i in range(5, _MAX_OBSERVATIONS + 5):
+            assert session.get_observation_by_path(f"f{i}.txt") is not None

@@ -159,8 +159,7 @@ class AgentCore:
 
     def _run_step(self, step: int) -> str | None:
         """단일 step 실행. 정상 종료 시 응답 문자열, 계속이면 None 반환."""
-        compact(self._session, stage="planner")
-        compact(self._session, stage="normal")
+        compact(self._session)
 
         self._status("planning", {"step": step})
         tool_descs, tool_notices = self._registry.get_tool_descriptions()
@@ -217,27 +216,15 @@ class AgentCore:
         tool_notices: list[str],
         ws_context: str,
     ) -> PlannerDecision:
-        """planner 호출. timeout 시 context 축소 후 1회 재시도."""
+        """planner 호출. timeout 은 상위 step 예외 처리로 propagate."""
         context = self._session.get_context_messages()
-        try:
-            return self._planner.decide(
-                context,
-                tool_descs,
-                tool_notices=tool_notices,
-                plan=self._session.plan or None,
-                workspace_context=ws_context,
-            )
-        except RuntimeError:
-            logger.warning("Planner timeout — context 축소 후 재시도")
-            compact(self._session, stage="aggressive")
-            context = self._session.get_context_messages()
-            return self._planner.decide(
-                context,
-                tool_descs,
-                tool_notices=tool_notices,
-                plan=self._session.plan or None,
-                workspace_context=ws_context,
-            )
+        return self._planner.decide(
+            context,
+            tool_descs,
+            tool_notices=tool_notices,
+            plan=self._session.plan or None,
+            workspace_context=ws_context,
+        )
 
     def _execute_tool(self, tool_name: str, input_data: dict[str, Any]) -> None:
         """tool 실행. 결과를 세션에 추가.

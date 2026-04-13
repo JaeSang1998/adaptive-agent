@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -11,6 +12,12 @@ from adaptive_agent.limits import (
     SESSION_RESULT_HEAD,
     SESSION_RESULT_TAIL,
 )
+
+logger = logging.getLogger(__name__)
+
+# observations dict 의 hard cap. $ref resolution fallback store 라 무한 증가 방지용.
+# typical 시나리오 (≤30 step) 에선 절대 발동 안 함. 100+ 턴 stress 시에만 oldest evict.
+_MAX_OBSERVATIONS = 100
 
 
 @dataclass(frozen=True, slots=True)
@@ -135,6 +142,12 @@ class Session:
         if key in self.observations:
             del self.observations[key]
         self.observations[key] = observation
+
+        # hard cap (oldest evict). $ref resolution 은 lookup 시 None graceful 처리됨.
+        while len(self.observations) > _MAX_OBSERVATIONS:
+            oldest = next(iter(self.observations))
+            del self.observations[oldest]
+            logger.debug("observation evicted (cap=%d): %s", _MAX_OBSERVATIONS, oldest)
 
     def get_observation_by_path(self, path: str) -> dict[str, Any] | None:
         """path-keyed observation lookup. $ref resolver 가 사용."""

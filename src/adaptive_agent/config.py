@@ -21,10 +21,12 @@ class LLMConfig:
     temperature: float = 0.0
     seed: int = 42
     max_tokens: int = 8192
-    # gemma4:26b 256K context 활용. ADR-001 의 token_budget=128_000 와 정합 보장
-    # (num_ctx < token_budget 이면 Ollama 가 silent truncation). 권장 메모리 ≥ 48GB.
+    # gemma4:26b 256K context 활용. 권장 메모리 ≥ 48GB.
     num_ctx: int = 131072
-    enable_native_tools: bool = False  # reason: native 가 선호 경로지만 default 모델 (gemma4:26b) 의 multi-turn empty content 이슈로 opt-in (ADR-004). env/config 로 언제든 enable.
+    # gemma4:26b 의 native tool calling 이 multi-turn + 긴 tool result + save action
+    # 패턴에서 empty content 반환하는 model-side 제약 관측. 다른 모델 또는 후속 버전
+    # 에서 해결되면 True 로 복귀. CLI override / env 로 즉시 enable 가능.
+    enable_native_tools: bool = False
     request_timeout_seconds: float = 120.0
     planner_max_tokens: int = 4096
     planner_timeout_seconds: float = 90.0
