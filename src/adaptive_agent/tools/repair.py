@@ -44,7 +44,9 @@ class ToolRepairer:
 
         try:
             response = self._client.chat(messages, phase="repair")
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
+            # builder.py 와 동일 정책: I/O / API / parse error 만 잡고
+            # KeyboardInterrupt / SystemExit / MemoryError 는 fail-fast.
             return RepairResult(success=False, error=f"LLM 호출 실패: {e}")
 
         code = extract_code(response.content)

@@ -12,7 +12,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from adaptive_agent.agent.core import AgentCore
-from adaptive_agent.agent.events import EventLogger
+from adaptive_agent.agent.events import EventLogger, EventType
 from adaptive_agent.agent.planner import Planner
 from adaptive_agent.agent.session import Session
 from adaptive_agent.config import Config
@@ -104,7 +104,7 @@ def _on_ask_user(question: str, choices: list[str] | None) -> str:
     return answer or "(응답 없음)"
 
 
-def _on_status(event: str, data: dict[str, Any]) -> None:
+def _on_status(event: EventType, data: dict[str, Any]) -> None:
     """에이전트 실행 중 상태 표시 + 이벤트 로깅 콜백."""
     if _event_logger:
         _event_logger.emit(event, data)

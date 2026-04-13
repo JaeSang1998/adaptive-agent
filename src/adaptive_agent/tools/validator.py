@@ -102,15 +102,31 @@ def _check_imports(tree: ast.Module) -> list[str]:
     return bad
 
 
+# 위험한 dunder 만 명시적으로 차단. 다른 dunder (`__init__`, `__iter__`,
+# `__getitem__` 등) 는 정상 Python 사용에 필요하므로 허용. 차단 대상은
+# metaclass / introspection 공격 경로:
+_DANGEROUS_DUNDERS: frozenset[str] = frozenset({
+    "__class__", "__bases__", "__subclasses__", "__mro__",
+    "__globals__", "__builtins__", "__import__",
+    "__getattribute__", "__reduce__", "__reduce_ex__",
+    "__dict__",
+})
+
+
 def _check_structure(tree: ast.Module) -> str:
-    """class 정의, dunder 속성 접근 등 구조적 위험 탐지."""
+    """class 정의, dunder 속성 접근 등 구조적 위험 탐지.
+
+    dunder 검사는 metaclass / introspection 공격 경로 (`x.__class__.__bases__`,
+    `obj.__globals__`, `__subclasses__`) 만 차단한다. 일반 dunder 메서드 정의
+    (`def __iter__(self):`) 는 ast.FunctionDef 이므로 이 검사를 통과한다.
+    """
     for node in ast.walk(tree):
         # class 정의 차단: metaclass 공격 방지
         if isinstance(node, ast.ClassDef):
             return f"클래스 정의가 허용되지 않습니다: {node.name}"
-        # dunder 속성 접근 차단: __class__, __bases__, __subclasses__ 등
-        if isinstance(node, ast.Attribute) and node.attr.startswith("__") and node.attr.endswith("__"):
-            return f"dunder 속성 접근이 허용되지 않습니다: {node.attr}"
+        # 위험한 dunder 속성 접근만 차단
+        if isinstance(node, ast.Attribute) and node.attr in _DANGEROUS_DUNDERS:
+            return f"위험한 dunder 속성 접근이 차단되었습니다: {node.attr}"
     return ""
 
 

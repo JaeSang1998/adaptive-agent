@@ -88,7 +88,15 @@ class Planner:
 
         # 경로 1: native tool_calls 응답
         if response.tool_calls:
-            tc = response.tool_calls[0]  # 첫 번째 tool call만 사용 (한 턴에 하나)
+            if len(response.tool_calls) > 1:
+                # 한 턴 = 한 도구 invariant. parallel tool_calls 는 drop.
+                # 모델이 자주 multiple 호출하면 prompt 측 한계로 다뤄야 함.
+                dropped = [tc.get("tool") for tc in response.tool_calls[1:]]
+                logger.warning(
+                    "Multiple tool_calls received (using first only). dropped=%s",
+                    dropped,
+                )
+            tc = response.tool_calls[0]
             logger.debug("Native tool call: %s", tc.get("tool"))
             return PlannerDecision(tool_call=tc, text=None, is_native_tool_call=True)
 

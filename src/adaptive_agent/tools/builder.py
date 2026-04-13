@@ -57,7 +57,11 @@ class ToolBuilder:
 
         try:
             response = self._client.chat(messages, phase="codegen")
-        except Exception as e:
+        except (RuntimeError, OSError, ValueError) as e:
+            # RuntimeError: client.py 의 retry 소진 후 raise.
+            # OSError: 네트워크 / 파일 I/O.
+            # ValueError: JSON / parsing 류.
+            # KeyboardInterrupt / SystemExit / MemoryError 는 잡지 않음 — fail-fast.
             return BuildResult(success=False, error=f"코드 생성 LLM 호출 실패: {e}")
 
         code = extract_code(response.content)

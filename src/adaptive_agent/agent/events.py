@@ -1,4 +1,9 @@
-"""구조화된 이벤트 로깅: sessions/{session_id}/events.jsonl."""
+"""구조화된 이벤트 로깅: sessions/{session_id}/events.jsonl.
+
+이벤트 타입은 `EventType` Literal 로 닫혀 있어 typo 가 IDE / pyright 에서 잡힌다.
+새 이벤트 타입 추가 시 이 모듈 + eval verifier 의 `event_occurred` 검증 키워드를
+함께 갱신해야 한다.
+"""
 
 from __future__ import annotations
 
@@ -6,7 +11,25 @@ import json
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Literal, cast
+
+
+# 모든 emit 가능한 이벤트 타입의 화이트리스트.
+# core.py 의 `_status(...)` 호출과 main.py 의 `_on_status(...)` match 분기에서 사용.
+EventType = Literal[
+    "planning",
+    "plan_updated",
+    "thinking",
+    "ask_user",
+    "generating_code",
+    "build_progress",
+    "creating_tool",
+    "tool_created",
+    "using_tool",
+    "tool_result",
+    "repairing_tool",
+    "suggested_file_detected",
+]
 
 
 class EventLogger:
@@ -26,7 +49,7 @@ class EventLogger:
     def log_path(self) -> Path:
         return self._log_path
 
-    def emit(self, event_type: str, data: dict[str, Any] | None = None) -> None:
+    def emit(self, event_type: EventType, data: dict[str, Any] | None = None) -> None:
         """이벤트를 JSONL 파일에 append."""
         entry: dict[str, Any] = {
             "ts": datetime.now(timezone.utc).isoformat(),

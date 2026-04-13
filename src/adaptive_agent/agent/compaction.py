@@ -25,6 +25,13 @@ _DEFAULT_TOKEN_BUDGET = 128_000
 CompactStage = Literal["planner", "normal", "aggressive"]
 
 
+# aggressive stage 에서 observation dict 보존 개수.
+# 가장 최근 N 개의 dehydration 대상 ($ref) 만 살리고 나머지는 dict 에서 제거.
+# 메시지 기반 prune 만으로는 session.observations 가 무한 증가 가능 (record_observation
+# 이 호출될 때마다 dict 가 커지지만 어떤 stage 도 dict 를 줄이지 않았던 문제).
+_AGGRESSIVE_OBSERVATIONS_KEEP = 3
+
+
 def compact(
     session: Session,
     *,
@@ -39,6 +46,7 @@ def compact(
 
     if stage == "aggressive":
         _mask_old_observations(session, keep_last=1)
+        _prune_observations(session, keep_recent=_AGGRESSIVE_OBSERVATIONS_KEEP)
         return
 
     # stage == "normal"
@@ -48,6 +56,20 @@ def compact(
     if _estimate_tokens(session) <= token_budget:
         return
     _sliding_window(session, keep_recent=6)
+    _prune_observations(session, keep_recent=_AGGRESSIVE_OBSERVATIONS_KEEP)
+
+
+def _prune_observations(session: Session, *, keep_recent: int) -> None:
+    """`session.observations` dict 를 가장 최근 keep_recent 개로 cap.
+
+    Python 3.7+ dict insertion order 에 의존 — record_observation 이 LRU 처럼
+    최신 항목을 dict 끝에 둔다. 따라서 마지막 keep_recent 개가 최신.
+    """
+    if len(session.observations) <= keep_recent:
+        return
+    keys_to_drop = list(session.observations.keys())[:-keep_recent]
+    for k in keys_to_drop:
+        del session.observations[k]
 
 
 def _estimate_tokens(session: Session) -> int:

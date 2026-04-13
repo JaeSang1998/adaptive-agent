@@ -50,9 +50,16 @@ Layer 1: AST 정적 검증 (validator.py, 5 단계 — 전부 AST 기반)
   - 금지 함수 호출 탐지 (ast.Call 노드):
       open, eval, exec, compile, __import__,
       getattr, setattr, delattr, globals, locals, vars
-  - 구조 검사 (class 정의 + dunder 속성 접근 차단)
+  - 구조 검사 (class 정의 차단 + 위험한 dunder 화이트리스트 기반 차단)
   - import를 코드 실행 전에 차단 → stdlib 내부 의존성 문제 없음
   - 모든 검사는 AST 노드 기반이라 docstring/주석 false positive 없음
+
+dunder 검사는 **모든 dunder 차단**이 아니라 명시적 위험 set 만 차단:
+`__class__`, `__bases__`, `__subclasses__`, `__mro__`, `__globals__`,
+`__builtins__`, `__import__`, `__getattribute__`, `__reduce__`,
+`__reduce_ex__`, `__dict__`. 이는 (`x.__class__.__bases__[0].__subclasses__()`
+같은) Python sandbox escape 의 알려진 entry point. 일반 dunder 메서드 정의
+(`def __iter__(self):`) 는 `ast.FunctionDef` 라 이 검사를 우회 — 의도된 동작.
 
 Layer 2: subprocess 프로세스 격리 (runner.py)
   - 별도 Python 인터프리터에서 실행

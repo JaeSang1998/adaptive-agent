@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Callable, TypedDict, cast
 
 from adaptive_agent.agent.compaction import compact
+from adaptive_agent.agent.events import EventType
 from adaptive_agent.agent.meta_tools import META_TOOL_NAMES
 from adaptive_agent.agent.planner import Planner, PlannerDecision
 from adaptive_agent.agent.session import PlanStep, Session, ToolResult
@@ -22,7 +23,7 @@ from adaptive_agent.tools.validator import validate_tool_code
 
 logger = logging.getLogger(__name__)
 
-StatusCallback = Callable[[str, dict[str, Any]], None]
+StatusCallback = Callable[[EventType, dict[str, Any]], None]
 ApprovalCallback = Callable[[str, dict[str, Any]], bool]
 AskUserCallback = Callable[[str, list[str] | None], str]
 
