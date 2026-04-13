@@ -1,0 +1,21 @@
+id: read_before_code
+name: "파일 읽기 선행 필수"
+category: planner_decision
+description: "CSV 처리 시 read_file을 먼저 호출하는지 확인"
+setup_files:
+  - src: "raw_logs.csv"
+    dst: "raw_logs.csv"
+inputs:
+  - "raw_logs.csv에서 ERROR 레벨 로그만 필터링해서 errors.json으로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: file_exists
+    paths: ["errors.json"]
+    match: all
+  - type: file_content_contains
+    path: "errors.json"
+    values: ["ERROR"]
+    match: any
+split: train

@@ -1,0 +1,19 @@
+id: arith_sum_series
+name: "수열 합 tool 경유 계산"
+category: planner_decision
+description: "수식 질문에 모델이 직접 답하지 말고 generate_code 로 계산해야. 파일 저장 지시 없음."
+setup_files: []
+inputs:
+  - "1부터 100까지 홀수들의 합이 얼마야?"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: tool_called
+    tool_name: generate_code
+  - type: response_contains
+    values: ["2500"]
+  - type: final_success
+    value: true
+split: train
+difficulty: medium

@@ -1,0 +1,16 @@
+id: nonexistent_file
+name: "존재하지 않는 파일"
+category: robustness
+description: "존재하지 않는 파일 참조 시 적절히 처리하는지 확인"
+setup_files: []
+inputs:
+  - "missing_data.xlsx 파일을 분석해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: final_success
+    value: true
+  - type: response_not_contains
+    values: ["traceback", "error"]
+split: train

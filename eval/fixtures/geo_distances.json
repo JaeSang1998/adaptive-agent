@@ -1,0 +1,13 @@
+{
+  "unit": "km",
+  "pairs": [
+    {"from": "C01", "to": "C03", "distance": 187},
+    {"from": "C01", "to": "C07", "distance": 342},
+    {"from": "C03", "to": "C07", "distance": 498},
+    {"from": "C02", "to": "C05", "distance": 276},
+    {"from": "C06", "to": "C09", "distance": 412},
+    {"from": "C06", "to": "C10", "distance": 218},
+    {"from": "C09", "to": "C10", "distance": 561},
+    {"from": "C04", "to": "C08", "distance": 734}
+  ]
+}

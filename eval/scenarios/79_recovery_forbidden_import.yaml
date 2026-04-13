@@ -1,0 +1,25 @@
+id: recovery_forbidden_import
+name: "HTML 파싱 — 표준 라이브러리 경로"
+category: repair_test
+description: "HTML 파일에서 요소 추출. 외부 패키지(bs4) 는 validator 가 reject → 모델이 표준 라이브러리로 재작성해야. 사용자가 구체 라이브러리 명시 안 함."
+setup_files:
+  - src: "sample_page.html"
+    dst: "sample_page.html"
+inputs:
+  - "sample_page.html 의 모든 p 태그 텍스트만 뽑아서 paragraphs.json 배열로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 240
+verify:
+  - type: tool_called
+    tool_name: generate_code
+    min_count: 1
+  - type: file_exists
+    paths: ["paragraphs.json"]
+    match: all
+  - type: file_content_contains
+    path: "paragraphs.json"
+    values: ["공지사항"]
+    match: any
+split: train
+difficulty: hard

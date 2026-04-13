@@ -1,0 +1,16 @@
+id: contradictory
+name: "모순되는 요청"
+category: robustness
+description: "논리적으로 모순되는 요청에 적절히 응답하는지 확인"
+setup_files: []
+inputs:
+  - "빈 리스트를 정렬하고 가장 큰 값 3개를 추출해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: final_success
+    value: true
+  - type: response_contains
+    values: ["빈", "없", "empty", "[]", "불가"]
+split: train

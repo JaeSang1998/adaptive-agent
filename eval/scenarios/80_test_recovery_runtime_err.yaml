@@ -1,0 +1,20 @@
+id: test_recovery_runtime_err
+name: "런타임 에러 repair 경로 (TEST)"
+category: repair_test
+description: "TEST. 빌드는 통과 but 런타임 KeyError 유발 → repair_tool 사용 검증."
+setup_files:
+  - src: "buggy_stats_v2.py"
+    dst: "buggy_stats_v2.py"
+inputs:
+  - "buggy_stats_v2.py 의 run 함수를 [5, 10, 15] 로 실행해서 stats.json 으로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 180
+verify:
+  - type: file_exists
+    paths: ["stats.json"]
+    match: all
+  - type: final_success
+    value: true
+split: test
+difficulty: medium

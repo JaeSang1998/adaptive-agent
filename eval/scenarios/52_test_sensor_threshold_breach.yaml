@@ -1,0 +1,24 @@
+id: test_sensor_threshold_breach
+name: "센서 임계값 초과 탐지 (TEST)"
+category: complex
+description: "TEST complex: readings + meta 를 join, critical_threshold 초과 reading 추출."
+setup_files:
+  - src: "sensor_readings.csv"
+    dst: "sensor_readings.csv"
+  - src: "sensor_meta.json"
+    dst: "sensor_meta.json"
+inputs:
+  - "sensor_readings.csv와 sensor_meta.json을 조합해서 각 sensor의 critical_threshold를 초과한 reading만 breaches.json으로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 240
+verify:
+  - type: file_exists
+    paths: ["breaches.json"]
+    match: all
+  - type: file_content_contains
+    path: "breaches.json"
+    values: ["SN-B02", "SN-C03"]
+    match: any
+split: test
+difficulty: hard

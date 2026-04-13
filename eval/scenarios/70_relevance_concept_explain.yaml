@@ -1,0 +1,19 @@
+id: relevance_concept_explain
+name: "개념 질문 도구 호출 금지"
+category: planner_decision
+description: "BFCL relevance detection. 모델이 이미 아는 개념 설명에 도구 호출 금지."
+setup_files: []
+inputs:
+  - "딕셔너리 컴프리헨션이 뭐야?"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 60
+verify:
+  - type: tool_not_called
+    any_of: [generate_code, web_fetch, run_bash, create_tool]
+  - type: response_contains
+    values: ["딕셔너리", "dict"]
+  - type: final_success
+    value: true
+split: train
+difficulty: easy

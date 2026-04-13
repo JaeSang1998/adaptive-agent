@@ -1,0 +1,21 @@
+id: repair_keyerror
+name: "KeyError 수리"
+category: repair_test
+description: "KeyError가 발생하는 버그 코드를 repair로 수정하는지 확인"
+setup_files:
+  - src: "buggy_stats_v2.py"
+    dst: "buggy_stats_v2.py"
+inputs:
+  - "buggy_stats_v2.py에 버그가 있습니다. 수정하고 [10,20,30,40,50] 데이터로 실행해서 result.json에 결과를 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: file_exists
+    paths: ["result.json"]
+    match: all
+  - type: file_content_contains
+    path: "result.json"
+    values: ["50"]
+    match: any
+split: train

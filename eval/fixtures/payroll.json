@@ -1,0 +1,13 @@
+{
+  "period": "2026-Q1",
+  "entries": [
+    {"emp_id": "E001", "base": 82000, "bonus": 4000, "tax": 12300, "paid": true},
+    {"emp_id": "E002", "base": 65000, "bonus": 2000, "tax": 9750, "paid": true},
+    {"emp_id": "E003", "base": 91000, "bonus": 5500, "tax": 13650, "paid": false},
+    {"emp_id": "E004", "base": 74000, "bonus": 3000, "tax": 11100, "paid": true},
+    {"emp_id": "E005", "base": 68000, "bonus": 1500, "tax": 10200, "paid": false},
+    {"emp_id": "E006", "base": 58000, "bonus": 1000, "tax": 8700, "paid": true},
+    {"emp_id": "E007", "base": 103000, "bonus": 7000, "tax": 15450, "paid": true},
+    {"emp_id": "E008", "base": 77000, "bonus": 2500, "tax": 11550, "paid": false}
+  ]
+}

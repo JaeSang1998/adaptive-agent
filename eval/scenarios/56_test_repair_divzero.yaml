@@ -1,0 +1,18 @@
+id: test_repair_divzero
+name: "ZeroDivision 수리 (TEST)"
+category: repair_test
+description: "TEST: 빈 리스트에서 div-by-zero 방어 추가."
+setup_files:
+  - src: "buggy_divzero.py"
+    dst: "buggy_divzero.py"
+inputs:
+  - "buggy_divzero.py에 버그가 있습니다. 수정하고 nums=[] 으로 실행한 뒤 결과를 empty_avg.json으로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 180
+verify:
+  - type: file_exists
+    paths: ["empty_avg.json"]
+    match: all
+split: test
+difficulty: medium

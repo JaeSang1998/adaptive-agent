@@ -1,0 +1,21 @@
+id: test_plan_no_loop
+name: "복잡 작업 plan 루프 없이 완료 (TEST)"
+category: complex
+description: "TEST. update_plan 만 반복하고 멈추지 말고 실제 도구 호출 후 완료."
+setup_files:
+  - src: "incidents.json"
+    dst: "incidents.json"
+inputs:
+  - "incidents.json 파일을 분석해서 severity 가 HIGH 이상인 사건만 필터링해 high_incidents.json 으로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 240
+verify:
+  - type: plan_progress
+  - type: file_exists
+    paths: ["high_incidents.json"]
+    match: all
+  - type: final_success
+    value: true
+split: test
+difficulty: medium

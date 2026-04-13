@@ -1,0 +1,22 @@
+id: test_repair_none_guard
+name: "None 값 처리 수리 (TEST)"
+category: repair_test
+description: "TEST: None 값 섞인 row 에서 TypeError 방어."
+setup_files:
+  - src: "buggy_none_guard.py"
+    dst: "buggy_none_guard.py"
+inputs:
+  - "buggy_none_guard.py에 버그가 있습니다. 수정하고 rows=[{value:5},{value:null},{value:3},{value:null},{value:7}] 으로 실행해서 none_total.json으로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 180
+verify:
+  - type: file_exists
+    paths: ["none_total.json"]
+    match: all
+  - type: file_content_contains
+    path: "none_total.json"
+    values: ["15"]
+    match: any
+split: test
+difficulty: medium

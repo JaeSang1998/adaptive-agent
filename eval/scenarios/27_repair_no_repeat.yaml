@@ -1,0 +1,21 @@
+id: repair_no_repeat
+name: ".py 모듈 함수 다른 인자 호출"
+category: builder_code
+description: "같은 외부 함수를 다른 데이터로 호출 — generate_code 경로 반복."
+setup_files:
+  - src: "buggy_tool.py"
+    dst: "buggy_tool.py"
+inputs:
+  - "buggy_tool.py 의 run 함수를 data=[100,200,300] 으로 호출한 결과를 repair_stats.json 으로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: file_exists
+    paths: ["repair_stats.json"]
+    match: all
+  - type: file_content_contains
+    path: "repair_stats.json"
+    values: ["200"]
+    match: any
+split: train

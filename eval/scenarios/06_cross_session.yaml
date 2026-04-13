@@ -1,0 +1,24 @@
+id: cross_session
+name: "몬스터 필터링 도구 생성"
+category: persistence
+description: "JSON에서 HP 100 이상 몬스터를 필터링하는 도구를 만들고 결과 저장"
+setup_files:
+  - src: "monsters.json"
+    dst: "monsters.json"
+inputs:
+  - "monsters.json에서 HP 100 이상인 몬스터를 필터링하는 도구를 만들어서 결과를 strong_monsters.json에 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: file_exists
+    paths: ["strong_monsters.json"]
+    match: all
+  - type: file_content_contains
+    path: "strong_monsters.json"
+    values: ["드래곤", "골렘", "크라켄"]
+    match: any
+  - type: event_occurred
+    event_type: tool_created
+    min_count: 1
+split: train

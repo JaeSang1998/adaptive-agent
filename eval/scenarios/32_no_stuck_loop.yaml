@@ -1,0 +1,18 @@
+id: no_stuck_loop
+name: "부분 결과 수용 (stuck loop 방지)"
+category: persistent_tool
+description: "10개 요청했지만 5개만 반환될 때, 반복 호출하지 않고 결과를 수용하여 응답하는지 확인."
+setup_files: []
+setup_tools:
+  - name: "mock_news_fetcher"
+inputs:
+  - "뉴스 10개 가져와줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: final_success
+    value: true
+  - type: response_contains
+    values: ["뉴스", "헤드라인"]
+split: train

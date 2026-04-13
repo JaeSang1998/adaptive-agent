@@ -1,0 +1,8 @@
+{
+  "sensors": [
+    {"sensor_id": "SN-A01", "asset": "turbine-west", "unit": "kPa", "critical_threshold": 102.0},
+    {"sensor_id": "SN-B02", "asset": "pump-east", "unit": "g", "critical_threshold": 0.70},
+    {"sensor_id": "SN-C03", "asset": "turbine-west", "unit": "rpm", "critical_threshold": 1800},
+    {"sensor_id": "SN-D04", "asset": "pump-east", "unit": "kPa", "critical_threshold": 100.0}
+  ]
+}

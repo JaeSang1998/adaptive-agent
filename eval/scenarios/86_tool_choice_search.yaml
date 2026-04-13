@@ -1,0 +1,19 @@
+id: tool_choice_search
+name: "검색 도구 선택 유연성"
+category: planner_decision
+description: "여러 검색 도구 중 하나 호출이면 정답 (grep_search / run_bash / glob_search)."
+setup_files:
+  - src: "src_sample"
+    dst: "src_sample"
+inputs:
+  - "src_sample 폴더에서 'deprecated' 문자열이 들어간 줄을 찾아줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: tool_called
+    any_of: [grep_search, run_bash, glob_search]
+  - type: final_success
+    value: true
+split: train
+difficulty: easy

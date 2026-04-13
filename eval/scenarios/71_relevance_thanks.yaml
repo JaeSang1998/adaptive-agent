@@ -1,0 +1,16 @@
+id: relevance_thanks
+name: "짧은 인사 변형 도구 호출 금지"
+category: planner_decision
+description: "BFCL relevance detection. 감사 표현에 도구 불호출, 텍스트 응답만."
+setup_files: []
+inputs:
+  - "고마워! 정말 도움이 됐어."
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 60
+verify:
+  - type: tool_not_called
+  - type: final_success
+    value: true
+split: train
+difficulty: easy

@@ -1,0 +1,24 @@
+id: test_shipment_overweight
+name: "carrier 한도 초과 화물 (TEST)"
+category: builder_code
+description: "TEST complex: shipments + carriers join, weight 가 carrier max_weight 초과 건 추출."
+setup_files:
+  - src: "shipments.csv"
+    dst: "shipments.csv"
+  - src: "carriers.json"
+    dst: "carriers.json"
+inputs:
+  - "shipments.csv의 각 화물이 담당 carrier의 max_weight를 초과했는지 확인해서 초과 건만 overweight.json으로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 240
+verify:
+  - type: file_exists
+    paths: ["overweight.json"]
+    match: all
+  - type: file_content_contains
+    path: "overweight.json"
+    values: ["SH-5502", "SH-5508"]
+    match: any
+split: test
+difficulty: hard

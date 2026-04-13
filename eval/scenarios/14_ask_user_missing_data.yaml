@@ -1,0 +1,17 @@
+id: ask_user_missing_data
+name: "데이터 누락 시 질문"
+category: planner_decision
+description: "처리할 데이터가 없을 때 ask_user로 질문하는지 확인"
+setup_files: []
+inputs:
+  - "이 데이터를 분석해줘"
+ask_user_responses:
+  - "sales_data.csv 파일을 분석하면 됩니다"
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: tool_called
+    tool_name: ask_user
+  - type: final_success
+    value: true
+split: train

@@ -1,0 +1,21 @@
+id: edge_missing_column
+name: "없는 컬럼 요청 edge case"
+category: edge_case
+description: "edge: 존재하지 않는 컬럼 요청에 대해 read 후 ask_user 또는 설명으로 응답 (하드 crash 금지)."
+setup_files:
+  - src: "employees.csv"
+    dst: "employees.csv"
+inputs:
+  - "employees.csv에서 bonus 컬럼의 합계를 구해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: final_success
+    value: true
+  - type: response_contains
+    values: ["bonus", "컬럼", "없", "존재하지"]
+  - type: response_not_contains
+    values: ["traceback", "KeyError"]
+split: train
+difficulty: medium

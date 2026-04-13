@@ -1,0 +1,11 @@
+ticket_id,priority,status,assignee,hours_open
+T-8001,high,open,rania,4.5
+T-8002,low,resolved,kael,18.2
+T-8003,medium,open,rania,2.1
+T-8004,urgent,open,marn,0.9
+T-8005,high,resolved,kael,22.7
+T-8006,medium,pending,marn,6.4
+T-8007,urgent,open,rania,1.3
+T-8008,low,resolved,kael,9.8
+T-8009,high,open,marn,5.2
+T-8010,medium,pending,rania,3.7

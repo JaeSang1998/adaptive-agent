@@ -1,0 +1,14 @@
+id: edge_empty
+name: "빈 입력 처리"
+category: edge_case
+description: "빈 입력이 주어졌을 때 에이전트가 정상적으로 처리하는지 확인"
+setup_files: []
+inputs:
+  - ""
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: final_success
+    value: true
+split: train

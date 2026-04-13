@@ -1,0 +1,16 @@
+id: repair_index_error
+name: "IndexError 수리"
+category: repair_test
+description: "빈 리스트 접근 시 IndexError를 repair로 해결하는지 확인"
+setup_files: []
+inputs:
+  - "빈 리스트 []에서 첫 번째 요소와 마지막 요소를 안전하게 가져오는 코드를 실행해줘. 빈 경우 None을 반환하면 돼."
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: final_success
+    value: true
+  - type: response_contains
+    values: ["None"]
+split: train

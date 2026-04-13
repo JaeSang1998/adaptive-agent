@@ -1,0 +1,18 @@
+id: test_edge_empty_sensor
+name: "빈 센서 데이터 처리 (TEST)"
+category: edge_case
+description: "TEST edge: 빈 sensor_meta 조건에서 crash 없이 응답."
+setup_files: []
+inputs:
+  - "sensor_empty.json 파일을 생성해달라. 센서가 하나도 없는 빈 배열 {sensors: []} 형태여야 한다. 그 뒤 이 파일을 읽어 sensor 수를 출력해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 180
+verify:
+  - type: file_exists
+    paths: ["sensor_empty.json"]
+    match: all
+  - type: final_success
+    value: true
+split: test
+difficulty: medium

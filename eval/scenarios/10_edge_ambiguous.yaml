@@ -1,0 +1,18 @@
+id: edge_ambiguous
+name: "모호한 요청 처리"
+category: edge_case
+description: "구체적이지 않은 요청에 대해 에이전트가 적절히 대응하는지 확인"
+setup_files:
+  - src: "sample_text.txt"
+    dst: "data.txt"
+inputs:
+  - "파일 분석해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: tool_called
+    tool_name: read_file
+  - type: final_success
+    value: true
+split: train

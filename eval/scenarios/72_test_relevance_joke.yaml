@@ -1,0 +1,16 @@
+id: test_relevance_joke
+name: "창작 요청 도구 호출 금지 (TEST)"
+category: planner_decision
+description: "TEST relevance detection. 창작/농담 요청은 모델 내부 응답이면 충분."
+setup_files: []
+inputs:
+  - "짧은 아재개그 하나 만들어줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 60
+verify:
+  - type: tool_not_called
+  - type: final_success
+    value: true
+split: test
+difficulty: easy

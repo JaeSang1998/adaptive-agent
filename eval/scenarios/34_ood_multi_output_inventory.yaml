@@ -1,0 +1,17 @@
+id: ood_multi_output_inventory
+name: "재고 데이터 available 분리 (OOD)"
+category: builder_code
+description: "OOD 검증: multi_output 원칙을 재고 도메인에서 확인. prompts.py의 active/inactive 대신 available/unavailable 도메인"
+setup_files:
+  - src: "inventory.json"
+    dst: "inventory.json"
+inputs:
+  - "inventory.json을 읽고 available이 true인 상품은 in_stock.json으로, false인 상품은 out_of_stock.json으로 분리 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 180
+verify:
+  - type: file_exists
+    paths: ["in_stock.json", "out_of_stock.json"]
+    match: all
+split: test

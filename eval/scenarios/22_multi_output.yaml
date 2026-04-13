@@ -1,0 +1,17 @@
+id: multi_output
+name: "여러 출력 파일 생성"
+category: builder_code
+description: "하나의 데이터에서 여러 출력 파일을 생성하는지 확인"
+setup_files:
+  - src: "users.json"
+    dst: "users.json"
+inputs:
+  - "users.json을 읽고 active인 사용자는 active_users.json으로, inactive인 사용자는 inactive_users.json으로 분리 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 180
+verify:
+  - type: file_exists
+    paths: ["active_users.json", "inactive_users.json"]
+    match: all
+split: train

@@ -1,0 +1,9 @@
+station_id,region,elevation_m,operator
+WS-001,Highlands,842,NMA
+WS-002,Coastal,12,NMA
+WS-003,Desert,395,PRI
+WS-004,Alpine,1640,NMA
+WS-005,Coastal,8,PRI
+WS-006,Highlands,1120,PRI
+WS-007,Desert,310,NMA
+WS-008,Alpine,2050,NMA

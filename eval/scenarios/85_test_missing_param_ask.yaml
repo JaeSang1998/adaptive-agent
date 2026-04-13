@@ -1,0 +1,20 @@
+id: test_missing_param_ask
+name: "파라미터 누락 시 질문 (TEST)"
+category: planner_decision
+description: "BFCL missing parameter. 'N' 값이 명시 안 됐으니 모델이 자발적으로 ask_user 해야."
+setup_files:
+  - src: "monsters.json"
+    dst: "monsters.json"
+inputs:
+  - "monsters.json 에서 상위 N 개만 뽑아 result.json 으로 저장해"
+ask_user_responses: ["5"]
+config_overrides: {}
+timeout_seconds: 180
+verify:
+  - type: tool_called
+    tool_name: ask_user
+  - type: file_exists
+    paths: ["result.json"]
+    match: all
+split: test
+difficulty: medium

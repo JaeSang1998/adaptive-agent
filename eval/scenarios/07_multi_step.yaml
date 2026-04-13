@@ -1,0 +1,21 @@
+id: multi_step
+name: "로그 분석 멀티스텝"
+category: complex
+description: "CSV 로그에서 ERROR 필터링, user_id별 집계, 상위 3명 추출"
+setup_files:
+  - src: "raw_logs.csv"
+    dst: "raw_logs.csv"
+inputs:
+  - "raw_logs.csv에서 ERROR 레벨만 필터링하고, user_id별 에러 수를 집계해서 에러가 가장 많은 상위 3명을 error_summary.json에 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: file_exists
+    paths: ["error_summary.json"]
+    match: all
+  - type: file_content_contains
+    path: "error_summary.json"
+    values: ["user_"]
+    match: any
+split: train

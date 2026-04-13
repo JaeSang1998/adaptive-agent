@@ -1,0 +1,18 @@
+id: repair_typeerror
+name: "TypeError 수리"
+category: repair_test
+description: "TypeError가 발생하는 버그 코드를 repair로 수정하는지 확인"
+setup_files:
+  - src: "buggy_type_error.py"
+    dst: "buggy_type_error.py"
+inputs:
+  - "buggy_type_error.py에 버그가 있습니다. 수정하고 text='hello world foo bar'로 실행해서 결과를 알려줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: final_success
+    value: true
+  - type: response_contains
+    values: ["4"]
+split: train

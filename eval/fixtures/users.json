@@ -1,0 +1,132 @@
+[
+  {
+    "id": 1,
+    "name": "김민수",
+    "email": "minsu.kim@example.com",
+    "age": 28,
+    "address": {
+      "city": "서울",
+      "district": "강남구",
+      "street": "테헤란로 123",
+      "zipcode": "06130"
+    },
+    "active": true
+  },
+  {
+    "id": 2,
+    "name": "이지은",
+    "email": "jieun.lee@example.com",
+    "age": 34,
+    "address": {
+      "city": "서울",
+      "district": "마포구",
+      "street": "월드컵북로 45",
+      "zipcode": "03900"
+    },
+    "active": false
+  },
+  {
+    "id": 3,
+    "name": "박준혁",
+    "email": "junhyeok.park@example.com",
+    "age": 22,
+    "address": {
+      "city": "부산",
+      "district": "해운대구",
+      "street": "해운대로 789",
+      "zipcode": "48094"
+    },
+    "active": true
+  },
+  {
+    "id": 4,
+    "name": "최수연",
+    "email": "suyeon.choi@example.com",
+    "age": 41,
+    "address": {
+      "city": "대전",
+      "district": "유성구",
+      "street": "대학로 56",
+      "zipcode": "34134"
+    },
+    "active": false
+  },
+  {
+    "id": 5,
+    "name": "정하늘",
+    "email": "haneul.jung@example.com",
+    "age": 30,
+    "address": {
+      "city": "인천",
+      "district": "연수구",
+      "street": "송도대로 200",
+      "zipcode": "21984"
+    },
+    "active": true
+  },
+  {
+    "id": 6,
+    "name": "강서윤",
+    "email": "seoyun.kang@example.com",
+    "age": 26,
+    "address": {
+      "city": "서울",
+      "district": "서초구",
+      "street": "반포대로 88",
+      "zipcode": "06500"
+    },
+    "active": false
+  },
+  {
+    "id": 7,
+    "name": "윤도현",
+    "email": "dohyun.yoon@example.com",
+    "age": 37,
+    "address": {
+      "city": "대구",
+      "district": "수성구",
+      "street": "동대구로 112",
+      "zipcode": "42020"
+    },
+    "active": true
+  },
+  {
+    "id": 8,
+    "name": "한예진",
+    "email": "yejin.han@example.com",
+    "age": 29,
+    "address": {
+      "city": "광주",
+      "district": "북구",
+      "street": "첨단과기로 33",
+      "zipcode": "61005"
+    },
+    "active": false
+  },
+  {
+    "id": 9,
+    "name": "송태민",
+    "email": "taemin.song@example.com",
+    "age": 45,
+    "address": {
+      "city": "수원",
+      "district": "영통구",
+      "street": "광교중앙로 150",
+      "zipcode": "16229"
+    },
+    "active": true
+  },
+  {
+    "id": 10,
+    "name": "오지민",
+    "email": "jimin.oh@example.com",
+    "age": 33,
+    "address": {
+      "city": "서울",
+      "district": "송파구",
+      "street": "올림픽로 300",
+      "zipcode": "05510"
+    },
+    "active": false
+  }
+]

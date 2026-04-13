@@ -1,0 +1,21 @@
+id: ood_read_first_orders
+name: "주문 CSV 처리 read 선행 (OOD)"
+category: planner_decision
+description: "OOD 검증: read_before_code 원칙을 주문 도메인에서 확인. prompts.py에 없는 orders.csv/cancelled_orders.json 사용"
+setup_files:
+  - src: "orders.csv"
+    dst: "orders.csv"
+inputs:
+  - "orders.csv에서 status가 CANCELLED인 주문만 추출해서 cancelled_orders.json으로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 180
+verify:
+  - type: file_exists
+    paths: ["cancelled_orders.json"]
+    match: all
+  - type: file_content_contains
+    path: "cancelled_orders.json"
+    values: ["CANCELLED"]
+    match: any
+split: test

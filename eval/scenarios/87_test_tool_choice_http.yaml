@@ -1,0 +1,16 @@
+id: test_tool_choice_http
+name: "외부 fetch 도구 선택 유연성 (TEST)"
+category: planner_decision
+description: "TEST. 구체적인 정보 검색 — web_fetch / run_bash+curl 등 여러 도구 중 하나 선택. 선언-only 금지."
+setup_files: []
+inputs:
+  - "한국 공휴일 목록 올해 거 찾아서 알려줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: tool_called
+    any_of: [web_fetch, run_bash]
+  - type: no_declare_only
+split: test
+difficulty: medium

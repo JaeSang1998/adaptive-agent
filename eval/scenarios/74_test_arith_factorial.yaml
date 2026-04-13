@@ -1,0 +1,19 @@
+id: test_arith_factorial
+name: "팩토리얼 tool 경유 계산 (TEST)"
+category: planner_decision
+description: "TEST. 큰 수 계산은 모델 산수로 틀리기 쉬워. generate_code 경유 필수."
+setup_files: []
+inputs:
+  - "12! 값이 뭐야?"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: tool_called
+    tool_name: generate_code
+  - type: response_contains
+    values: ["479001600"]
+  - type: final_success
+    value: true
+split: test
+difficulty: medium

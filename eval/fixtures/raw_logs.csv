@@ -1,0 +1,52 @@
+timestamp,level,message,user_id
+2024-03-01 08:15:23,INFO,User login successful,user_001
+2024-03-01 08:16:45,ERROR,Database connection timeout,user_002
+2024-03-01 08:17:12,INFO,Page view: dashboard,user_001
+2024-03-01 08:18:33,ERROR,Invalid API key provided,user_003
+2024-03-01 08:19:01,WARNING,High memory usage detected,system
+2024-03-01 08:20:15,ERROR,File upload failed: size exceeded,user_001
+2024-03-01 08:21:44,INFO,User logout,user_002
+2024-03-01 08:22:30,ERROR,Database connection timeout,user_004
+2024-03-01 08:23:18,INFO,Page view: settings,user_003
+2024-03-01 08:24:55,ERROR,Permission denied: admin resource,user_005
+2024-03-01 08:25:10,INFO,User login successful,user_004
+2024-03-01 08:26:33,ERROR,Invalid request payload,user_001
+2024-03-01 08:27:22,WARNING,Disk space below 20%,system
+2024-03-01 08:28:41,ERROR,Database connection timeout,user_002
+2024-03-01 08:29:15,INFO,Page view: reports,user_005
+2024-03-01 08:30:08,ERROR,Session expired,user_003
+2024-03-01 08:31:29,INFO,User login successful,user_006
+2024-03-01 08:32:45,ERROR,File not found: config.yaml,user_001
+2024-03-01 08:33:12,INFO,Data export completed,user_004
+2024-03-01 08:34:56,ERROR,Rate limit exceeded,user_002
+2024-03-01 08:35:23,WARNING,API response slow: 3.2s,system
+2024-03-01 08:36:41,ERROR,Invalid email format,user_005
+2024-03-01 08:37:18,INFO,User login successful,user_007
+2024-03-01 08:38:29,ERROR,Database query timeout,user_003
+2024-03-01 08:39:44,INFO,Page view: dashboard,user_006
+2024-03-01 08:40:15,ERROR,Null pointer in data processing,user_001
+2024-03-01 08:41:33,INFO,Scheduled backup started,system
+2024-03-01 08:42:22,ERROR,Authentication token expired,user_002
+2024-03-01 08:43:18,INFO,Page view: profile,user_007
+2024-03-01 08:44:55,ERROR,Connection refused: external API,user_004
+2024-03-01 08:45:10,WARNING,CPU usage above 90%,system
+2024-03-01 08:46:29,ERROR,Duplicate entry in database,user_005
+2024-03-01 08:47:33,INFO,User logout,user_001
+2024-03-01 08:48:41,ERROR,Invalid JSON in request body,user_003
+2024-03-01 08:49:18,INFO,Cache cleared successfully,system
+2024-03-01 08:50:22,ERROR,Timeout waiting for response,user_002
+2024-03-01 08:51:45,INFO,User login successful,user_008
+2024-03-01 08:52:33,ERROR,File write permission denied,user_006
+2024-03-01 08:53:12,WARNING,Memory leak detected in worker,system
+2024-03-01 08:54:29,ERROR,Invalid date format in input,user_001
+2024-03-01 08:55:41,INFO,Page view: analytics,user_008
+2024-03-01 08:56:18,ERROR,Database deadlock detected,user_004
+2024-03-01 08:57:33,INFO,Daily report generated,system
+2024-03-01 08:58:22,ERROR,SSL certificate verification failed,user_005
+2024-03-01 08:59:45,INFO,User login successful,user_009
+2024-03-01 09:00:15,ERROR,Out of memory error,user_002
+2024-03-01 09:01:29,INFO,Page view: dashboard,user_009
+2024-03-01 09:02:33,ERROR,Request entity too large,user_003
+2024-03-01 09:03:18,WARNING,Service degradation detected,system
+2024-03-01 09:04:41,ERROR,Foreign key constraint violation,user_001
+2024-03-01 09:05:22,INFO,Batch processing completed,system

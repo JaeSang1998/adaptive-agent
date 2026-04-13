@@ -1,0 +1,10 @@
+{"station_id": "WS-001", "ts": "2026-03-01T00:00:00", "temp_c": -2.1, "humidity": 78, "wind_kmh": 14}
+{"station_id": "WS-001", "ts": "2026-03-01T06:00:00", "temp_c": -3.4, "humidity": 82, "wind_kmh": 18}
+{"station_id": "WS-002", "ts": "2026-03-01T00:00:00", "temp_c": 11.2, "humidity": 65, "wind_kmh": 22}
+{"station_id": "WS-002", "ts": "2026-03-01T06:00:00", "temp_c": 10.8, "humidity": 68, "wind_kmh": 25}
+{"station_id": "WS-003", "ts": "2026-03-01T00:00:00", "temp_c": 18.5, "humidity": 22, "wind_kmh": 9}
+{"station_id": "WS-003", "ts": "2026-03-01T06:00:00", "temp_c": 14.1, "humidity": 28, "wind_kmh": 11}
+{"station_id": "WS-004", "ts": "2026-03-01T00:00:00", "temp_c": -8.9, "humidity": 71, "wind_kmh": 32}
+{"station_id": "WS-004", "ts": "2026-03-01T06:00:00", "temp_c": -10.2, "humidity": 74, "wind_kmh": 28}
+{"station_id": "WS-005", "ts": "2026-03-01T00:00:00", "temp_c": 12.1, "humidity": 69, "wind_kmh": 19}
+{"station_id": "WS-006", "ts": "2026-03-01T00:00:00", "temp_c": 4.2, "humidity": 66, "wind_kmh": 16}

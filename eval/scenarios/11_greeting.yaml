@@ -1,0 +1,17 @@
+id: greeting
+name: "인사 처리"
+category: planner_decision
+description: "단순 인사에 텍스트로 응답하고 도구를 호출하지 않는지 확인"
+setup_files: []
+inputs:
+  - "안녕하세요! 반갑습니다."
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 60
+verify:
+  - type: tool_not_called
+  - type: final_success
+    value: true
+  - type: response_contains
+    values: ["안녕", "반갑"]
+split: train

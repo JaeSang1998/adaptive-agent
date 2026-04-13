@@ -1,0 +1,18 @@
+id: empty_csv
+name: "빈 CSV 처리"
+category: builder_code
+description: "데이터가 없는 CSV를 처리할 때 코드가 에러 없이 동작하는지 확인"
+setup_files:
+  - src: "empty_data.csv"
+    dst: "empty_data.csv"
+inputs:
+  - "empty_data.csv를 읽고 각 카테고리별 평균 value를 계산해서 결과를 알려줘. 데이터가 없으면 없다고 알려줘."
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: final_success
+    value: true
+  - type: response_contains
+    values: ["없", "비어", "empty"]
+split: train

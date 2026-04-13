@@ -1,0 +1,7 @@
+{
+  "carriers": [
+    {"carrier": "Fleetway", "max_weight": 50, "avg_days": 2},
+    {"carrier": "Rapidis", "max_weight": 120, "avg_days": 4},
+    {"carrier": "Northarc", "max_weight": 80, "avg_days": 3}
+  ]
+}

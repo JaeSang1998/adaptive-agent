@@ -1,0 +1,24 @@
+id: deprecated_scan
+name: "Deprecated 함수 스캔"
+category: data_pipeline
+description: "Python 소스 파일에서 deprecated 함수를 찾아 JSON으로 저장"
+setup_files:
+  - src: "src_sample/"
+    dst: "src/"
+inputs:
+  - "src 폴더의 모든 Python 파일에서 deprecated 함수를 찾아서 deprecated_list.json으로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: file_exists
+    paths: ["deprecated_list.json"]
+    match: all
+  - type: file_content_contains
+    path: "deprecated_list.json"
+    values:
+      - "parse_legacy_config"
+      - "hash_password_md5"
+      - "load_csv_as_dicts"
+    match: any
+split: train

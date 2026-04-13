@@ -1,0 +1,22 @@
+id: repair_off_by_one
+name: "off-by-one 버그 수리"
+category: repair_test
+description: "repair 원칙: buggy_off_by_one.py 의 slice 오류를 수정하고 실행."
+setup_files:
+  - src: "buggy_off_by_one.py"
+    dst: "buggy_off_by_one.py"
+inputs:
+  - "buggy_off_by_one.py에 버그가 있습니다. 수정하고 items=[{name:A,score:10},{name:B,score:30},{name:C,score:20},{name:D,score:40}], n=3 으로 실행해서 top3.json으로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 180
+verify:
+  - type: file_exists
+    paths: ["top3.json"]
+    match: all
+  - type: file_content_contains
+    path: "top3.json"
+    values: ["count"]
+    match: any
+split: train
+difficulty: medium

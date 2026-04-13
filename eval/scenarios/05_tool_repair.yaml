@@ -1,0 +1,21 @@
+id: tool_repair
+name: "외부 Python 모듈 함수 호출"
+category: builder_code
+description: ".py 파일을 read 후 generate_code 로 해당 함수 import 해서 호출하는 패턴 (Rule 7 기본)."
+setup_files:
+  - src: "buggy_tool.py"
+    dst: "buggy_tool.py"
+inputs:
+  - "buggy_tool.py 로 [1,2,3,4,5,6,7,8,9,10] 데이터의 통계를 내서 stats.json 에 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 180
+verify:
+  - type: file_exists
+    paths: ["stats.json"]
+    match: all
+  - type: file_content_contains
+    path: "stats.json"
+    values: ["5.5", "55"]
+    match: any
+split: train

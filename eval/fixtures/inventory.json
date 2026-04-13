@@ -1,0 +1,9 @@
+[
+  {"sku": "SKU-001", "name": "노트북 프로", "category": "전자제품", "available": true, "quantity": 15},
+  {"sku": "SKU-002", "name": "무선 마우스", "category": "주변기기", "available": false, "quantity": 0},
+  {"sku": "SKU-003", "name": "기계식 키보드", "category": "주변기기", "available": true, "quantity": 42},
+  {"sku": "SKU-004", "name": "4K 모니터", "category": "전자제품", "available": false, "quantity": 0},
+  {"sku": "SKU-005", "name": "노이즈캔슬링 헤드셋", "category": "오디오", "available": true, "quantity": 8},
+  {"sku": "SKU-006", "name": "HD 웹캠", "category": "주변기기", "available": true, "quantity": 23},
+  {"sku": "SKU-007", "name": "USB-C 허브", "category": "액세서리", "available": false, "quantity": 0}
+]

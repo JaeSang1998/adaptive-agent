@@ -1,0 +1,22 @@
+id: test_format_nested_keys
+name: "중첩 구조 설계 (TEST)"
+category: builder_code
+description: "TEST. 사용자가 자연어로 '메타 정보와 사용자 목록을 함께' 요구 → 모델이 스스로 중첩 구조 설계. root 가 object, 최소 1개 array 필드."
+setup_files:
+  - src: "users.json"
+    dst: "users.json"
+inputs:
+  - "users.json 을 읽고 profile.json 으로 저장해줘. 한 파일 안에 전체 사용자 수나 날짜 같은 메타 정보랑 실제 사용자 목록이 같이 들어가도록 구조 잡아줘."
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 180
+verify:
+  - type: file_exists
+    paths: ["profile.json"]
+    match: all
+  - type: file_content_contains
+    path: "profile.json"
+    values: ["[", "김민수"]
+    match: all
+split: test
+difficulty: medium

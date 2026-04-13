@@ -1,0 +1,21 @@
+id: plan_progress_5steps
+name: "5단계 작업 plan + 실제 실행"
+category: complex
+description: "plan 만 반복 emit 하지 말고 실제 도구 호출로 진행하는지 검증."
+setup_files:
+  - src: "orders.csv"
+    dst: "orders.csv"
+inputs:
+  - "orders.csv 를 읽고, status 가 COMPLETED 인 주문만 뽑고, 그 중 quantity 상위 5개를 추출해 top_orders.json 으로 저장한 뒤 건수를 알려줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 240
+verify:
+  - type: plan_progress
+  - type: file_exists
+    paths: ["top_orders.json"]
+    match: all
+  - type: final_success
+    value: true
+split: train
+difficulty: hard

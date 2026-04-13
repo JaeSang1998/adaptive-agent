@@ -1,0 +1,25 @@
+id: format_json_schema_strict
+name: "엄격 JSON 스키마 지시 준수"
+category: builder_code
+description: "사용자가 구체적 JSON 스키마를 명시. 모델이 지시를 정확히 준수하는지 측정 (instruction following, 정당한 축)."
+setup_files:
+  - src: "monsters.json"
+    dst: "monsters.json"
+inputs:
+  - "monsters.json 을 읽고 summary.json 으로 저장해줘. summary.json 은 반드시 result, count, items 세 개 키를 가져야 해. result 는 요약 문자열, count 는 숫자, items 는 배열이야."
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 180
+verify:
+  - type: file_exists
+    paths: ["summary.json"]
+    match: all
+  - type: json_schema
+    path: "summary.json"
+    required_keys: ["result", "count", "items"]
+    types:
+      count: "number"
+      items: "array"
+      result: "string"
+split: train
+difficulty: medium

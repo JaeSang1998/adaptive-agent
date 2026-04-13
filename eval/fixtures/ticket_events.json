@@ -1,0 +1,11 @@
+{
+  "events": [
+    {"ticket_id": "T-8001", "action": "opened", "at": "2026-03-02T08:10:00"},
+    {"ticket_id": "T-8001", "action": "assigned", "at": "2026-03-02T08:15:00"},
+    {"ticket_id": "T-8001", "action": "commented", "at": "2026-03-02T10:22:00"},
+    {"ticket_id": "T-8004", "action": "opened", "at": "2026-03-02T11:40:00"},
+    {"ticket_id": "T-8004", "action": "escalated", "at": "2026-03-02T11:55:00"},
+    {"ticket_id": "T-8007", "action": "opened", "at": "2026-03-02T12:05:00"},
+    {"ticket_id": "T-8002", "action": "resolved", "at": "2026-03-01T20:18:00"}
+  ]
+}

@@ -1,0 +1,27 @@
+id: test_multiturn_pivot
+name: "방향 전환 대화 (multi-turn, TEST)"
+category: planner_decision
+description: "T1 에서 한 방향으로 처리, T2 에서 다른 파일로 pivot 요청. 새 접근 수용."
+setup_files:
+  - src: "monsters.json"
+    dst: "monsters.json"
+  - src: "users.json"
+    dst: "users.json"
+turns:
+  - user: "monsters.json 에서 HP 100 이상인 몬스터 이름만 뽑아 names_a.json 으로 저장해줘"
+    expect:
+      - type: file_exists
+        paths: ["names_a.json"]
+        match: all
+  - user: "아니, users.json 의 이름만 뽑아서 names_b.json 으로 저장해줘"
+    expect:
+      - type: file_exists
+        paths: ["names_b.json"]
+        match: all
+config_overrides: {}
+timeout_seconds: 300
+verify:
+  - type: final_success
+    value: true
+split: test
+difficulty: hard

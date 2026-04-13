@@ -1,0 +1,12 @@
+[
+  {"name": "드래곤", "hp": 250, "attack": 80, "type": "화염"},
+  {"name": "슬라임", "hp": 30, "attack": 5, "type": "일반"},
+  {"name": "골렘", "hp": 180, "attack": 45, "type": "대지"},
+  {"name": "고블린", "hp": 50, "attack": 15, "type": "일반"},
+  {"name": "피닉스", "hp": 120, "attack": 65, "type": "화염"},
+  {"name": "스켈레톤", "hp": 40, "attack": 20, "type": "암흑"},
+  {"name": "크라켄", "hp": 200, "attack": 70, "type": "수중"},
+  {"name": "오크", "hp": 90, "attack": 35, "type": "일반"},
+  {"name": "리치", "hp": 150, "attack": 55, "type": "암흑"},
+  {"name": "그리폰", "hp": 110, "attack": 50, "type": "바람"}
+]

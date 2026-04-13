@@ -1,0 +1,14 @@
+{
+  "catalog": [
+    {"isbn": "9780000001", "title": "Atlas of Shallow Seas", "genre": "science", "copies": 3},
+    {"isbn": "9780000002", "title": "The Quiet Hour", "genre": "novel", "copies": 2},
+    {"isbn": "9780000003", "title": "Forged Lanterns", "genre": "novel", "copies": 1},
+    {"isbn": "9780000004", "title": "Calculus for Gardeners", "genre": "science", "copies": 4},
+    {"isbn": "9780000005", "title": "A Year Under Canvas", "genre": "memoir", "copies": 2},
+    {"isbn": "9780000006", "title": "Rivers Without Names", "genre": "novel", "copies": 1},
+    {"isbn": "9780000007", "title": "Signals in the Noise", "genre": "science", "copies": 3},
+    {"isbn": "9780000008", "title": "Porches and Paper", "genre": "memoir", "copies": 2},
+    {"isbn": "9780000009", "title": "Binary Flowers", "genre": "science", "copies": 1},
+    {"isbn": "9780000010", "title": "The Borrowed Map", "genre": "novel", "copies": 2}
+  ]
+}

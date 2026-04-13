@@ -1,0 +1,16 @@
+id: test_realtime_httpbin
+name: "실시간 외부 정보 즉시 도구 호출 (TEST)"
+category: planner_decision
+description: "TEST. 실시간 정보 요청 — 모델이 외부 조회 필요성 판단하고 바로 도구 호출."
+setup_files: []
+inputs:
+  - "부산 최신 기온 알려줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: tool_called
+    any_of: [web_fetch, run_bash]
+  - type: no_declare_only
+split: test
+difficulty: medium

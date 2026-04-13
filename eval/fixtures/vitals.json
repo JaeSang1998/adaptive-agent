@@ -1,0 +1,12 @@
+{
+  "measurements": [
+    {"pid": "P-101", "systolic": 118, "diastolic": 76, "hr": 68, "fever": false},
+    {"pid": "P-102", "systolic": 142, "diastolic": 88, "hr": 81, "fever": false},
+    {"pid": "P-103", "systolic": 151, "diastolic": 94, "hr": 77, "fever": false},
+    {"pid": "P-104", "systolic": 121, "diastolic": 79, "hr": 71, "fever": true},
+    {"pid": "P-105", "systolic": 138, "diastolic": 85, "hr": 74, "fever": false},
+    {"pid": "P-106", "systolic": 149, "diastolic": 92, "hr": 82, "fever": false},
+    {"pid": "P-107", "systolic": 116, "diastolic": 72, "hr": 88, "fever": true},
+    {"pid": "P-108", "systolic": 147, "diastolic": 91, "hr": 79, "fever": false}
+  ]
+}

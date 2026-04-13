@@ -1,0 +1,24 @@
+id: test_patient_report
+name: "환자 종합 리포트 (TEST)"
+category: data_pipeline
+description: "복합 분석: patients + vitals join, 만성질환 + 이상 혈압 요약."
+setup_files:
+  - src: "patients.csv"
+    dst: "patients.csv"
+  - src: "vitals.json"
+    dst: "vitals.json"
+inputs:
+  - "patients.csv와 vitals.json을 조합해서 만성질환이 있고 systolic이 140 이상인 환자의 pid, given_name, chronic, systolic을 risky_patients.json으로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 240
+verify:
+  - type: file_exists
+    paths: ["risky_patients.json"]
+    match: all
+  - type: file_content_contains
+    path: "risky_patients.json"
+    values: ["P-102", "P-103", "P-106", "P-108"]
+    match: any
+split: test
+difficulty: hard

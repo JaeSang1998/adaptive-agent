@@ -1,0 +1,8 @@
+{"ts": "2026-04-01T09:00:01", "level": "INFO", "svc": "auth", "msg": "login ok", "latency_ms": 42}
+{"ts": "2026-04-01T09:00:05", "level": "WARN", "svc": "billing", "msg": "retry invoice", "latency_ms": 310}
+{"ts": "2026-04-01T09:00:11", "level": "ERROR", "svc": "auth", "msg": "token expired", "latency_ms": 8}
+{"ts": "2026-04-01T09:00:18", "level": "INFO", "svc": "search", "msg": "query ok", "latency_ms": 122}
+{"ts": "2026-04-01T09:00:24", "level": "ERROR", "svc": "billing", "msg": "gateway timeout", "latency_ms": 5002}
+{"ts": "2026-04-01T09:00:30", "level": "INFO", "svc": "auth", "msg": "logout ok", "latency_ms": 15}
+{"ts": "2026-04-01T09:00:36", "level": "WARN", "svc": "search", "msg": "slow index", "latency_ms": 889}
+{"ts": "2026-04-01T09:00:41", "level": "ERROR", "svc": "search", "msg": "shard unreachable", "latency_ms": 3200}

@@ -1,0 +1,28 @@
+[
+  {
+    "order_id": "ORD-001",
+    "customer": {"name": "Alice", "email": "alice@test.com"},
+    "items": [
+      {"product": "Laptop", "qty": 1, "price": 1200},
+      {"product": "Mouse", "qty": 2, "price": 25}
+    ],
+    "status": "completed"
+  },
+  {
+    "order_id": "ORD-002",
+    "customer": {"name": "Bob", "email": "bob@test.com"},
+    "items": [
+      {"product": "Keyboard", "qty": 1, "price": 75}
+    ],
+    "status": "pending"
+  },
+  {
+    "order_id": "ORD-003",
+    "customer": {"name": "Charlie", "email": "charlie@test.com"},
+    "items": [
+      {"product": "Monitor", "qty": 1, "price": 400},
+      {"product": "Cable", "qty": 3, "price": 10}
+    ],
+    "status": "completed"
+  }
+]

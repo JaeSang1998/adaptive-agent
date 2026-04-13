@@ -1,0 +1,9 @@
+shipment_id,carrier,origin,destination,weight_kg,delivered
+SH-5501,Fleetway,Ashbourne,Cressenvale,12.4,true
+SH-5502,Rapidis,Duskwater,Lornfeld,188.1,false
+SH-5503,Fleetway,Thornbridge,Winholm,5.7,true
+SH-5504,Northarc,Elmspire,Glentide,41.2,false
+SH-5505,Rapidis,Cressenvale,Ashbourne,67.9,true
+SH-5506,Fleetway,Winholm,Thornbridge,63.2,true
+SH-5507,Northarc,Glentide,Elmspire,92.8,false
+SH-5508,Rapidis,Lornfeld,Duskwater,195.5,true

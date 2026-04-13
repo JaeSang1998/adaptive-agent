@@ -1,0 +1,18 @@
+id: realtime_wttr
+name: "실시간 외부 정보 즉시 도구 호출"
+category: planner_decision
+description: "실시간 정보 요청에 선언만 하지 말고 즉시 도구 호출. 모델이 외부 fetch 필요성 스스로 판단해야."
+setup_files: []
+inputs:
+  - "서울 지금 날씨 어때?"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: tool_called
+    any_of: [web_fetch, run_bash]
+  - type: no_declare_only
+  - type: final_success
+    value: true
+split: train
+difficulty: medium

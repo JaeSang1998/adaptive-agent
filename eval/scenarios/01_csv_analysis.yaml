@@ -1,0 +1,23 @@
+id: csv_analysis
+name: "CSV 매출 데이터 분석"
+category: data_pipeline
+description: "CSV 파일에서 매출 상위 5개 제품을 찾아 JSON으로 저장"
+setup_files:
+  - src: "sales_data.csv"
+    dst: "sales_data.csv"
+inputs:
+  - "이 CSV 파일에서 매출 상위 5개 제품을 찾아서 결과를 top5.json으로 저장해줘"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 120
+verify:
+  - type: file_exists
+    paths: ["top5.json"]
+    match: all
+  - type: file_content_contains
+    path: "top5.json"
+    values: ["노트북", "모니터"]
+    match: any
+  - type: response_contains
+    values: ["상위", "5"]
+split: train

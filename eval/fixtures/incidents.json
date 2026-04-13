@@ -1,0 +1,6 @@
+[
+  {"time": "2024-03-01T09:03:00", "severity": "HIGH", "description": "API 응답 지연 감지"},
+  {"time": "2024-03-01T09:08:00", "severity": "CRITICAL", "description": "서비스 부분 장애"},
+  {"time": "2024-03-01T09:18:00", "severity": "LOW", "description": "일부 로그 경고"},
+  {"time": "2024-03-01T09:26:00", "severity": "HIGH", "description": "응답 시간 임계치 초과"}
+]

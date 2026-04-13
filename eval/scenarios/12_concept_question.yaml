@@ -1,0 +1,17 @@
+id: concept_question
+name: "개념 질문 텍스트 응답"
+category: planner_decision
+description: "기술 개념 질문에 도구 없이 텍스트로 설명하는지 확인"
+setup_files: []
+inputs:
+  - "Python의 리스트 컴프리헨션이 뭐야?"
+ask_user_responses: []
+config_overrides: {}
+timeout_seconds: 60
+verify:
+  - type: tool_not_called
+  - type: final_success
+    value: true
+  - type: response_contains
+    values: ["리스트", "list"]
+split: train
