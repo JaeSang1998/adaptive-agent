@@ -272,7 +272,7 @@ Agent의 모든 의사결정이 LLM 호출에 의존합니다. 호출 안정성(
 <summary><b>선택</b></summary>
 
 - **단일 provider (Ollama)** — 현 범위에서 multi-provider 추상화는 복잡성만 추가. 전환 지점은 `LLMClientProtocol` 인터페이스 한 곳에 격리.
-- **Native tool calling + prompt-based fallback 이중 경로** — Ollama v0.20.3+의 native tool calling을 우선 사용하되, 미지원 모델에서 자동 fallback. 첫 호출에서 capability auto-detection.
+- **Native tool calling + prompt-based fallback 이중 경로** — Ollama v0.20.3+의 native tool calling을 우선 사용하되, 미지원 모델에서 자동 fallback. 첫 호출에서 capability auto-detection. _현재 default 모델 (`gemma4:26b`) 의 multi-turn empty content 이슈로 기본값은 prompt-based, native 는 opt-in. 다른 모델 사용 시 env/config 로 즉시 enable. 자세히는 [ADR-004](docs/decisions/004-native-tools-default.md)._
 - **Phase별 token/timeout 분리** — planner(4096 tok / 90s), code(8192 tok / 120s), repair(8192 tok / 120s). 단일 설정 대비 P99 latency 단축.
 - **다단계 JSON 파싱** — 전체 파싱 → 코드블록 추출 → 중첩 JSON 추출 → `json_repair` healing. fallback 경로에서 다양한 모델 출력을 수용.
 </details>
@@ -286,7 +286,7 @@ native 모드에서 도구 결과가 `role: "tool"` + `tool_name`으로 전달, 
 <details>
 <summary><b>한계</b></summary>
 
-fallback 모드에서는 도구 결과를 `role: "user"`로 보내고 접두사 `[도구 ...]`로만 구분합니다. 이는 **구조적 role 오염**으로, 도구 결과에 악의적 텍스트가 포함되면 사용자 메시지로 오인될 수 있습니다. native tool calling 모드에서는 role이 완전 분리되어 이 문제가 없으므로, 가능하면 native 모드 사용을 권장합니다. `json_repair` 외부 의존성은 이 fallback 안정성을 위한 유일한 비순정 의존성.
+fallback 모드에서는 도구 결과를 `role: "user"`로 보내고 접두사 `[도구 ...]`로만 구분합니다. 이는 **구조적 role 오염**으로, 도구 결과에 악의적 텍스트가 포함되면 사용자 메시지로 오인될 수 있습니다. native tool calling 모드에서는 role이 완전 분리되어 이 문제가 없으므로, 가능하면 native 모드 사용을 권장합니다 ([ADR-004](docs/decisions/004-native-tools-default.md) 참고 — 현재 default 모델은 일시적 예외). `json_repair` 외부 의존성은 이 fallback 안정성을 위한 유일한 비순정 의존성.
 </details>
 
 <details>
@@ -671,7 +671,7 @@ main.py → agent/core.py
 
 1. **Container 기반 실행** — Docker/nsjail로 cgroup + seccomp 완전 격리. 보안 모델의 잔여 위험 대부분을 해소하는 가장 높은 임팩트 개선.
 2. **pass@k 측정** — 시나리오당 N회 반복 실행으로 통계적 신뢰 확보. 현재 최적화 루프의 가장 큰 약점.
-3. **Builder/Repair에도 native tool calling** — 현재 Planner만 native. Builder/Repair도 전환하면 코드 생성 파싱 실패율 추가 감소.
+3. **Builder/Repair에도 native tool calling** — 현재 Planner만 native. Builder/Repair도 전환하면 코드 생성 파싱 실패율 추가 감소. (전제: default 모델의 multi-turn native tool calling stabilize 후 `enable_native_tools=true` 복귀, [ADR-004](docs/decisions/004-native-tools-default.md))
 4. **Embedding 기반 도구 검색** — 도구 수천 개 이상 시 필요. 현재 수백 개 규모에서는 키워드 매칭으로 충분.
 5. **도구 unit test 자동 생성** — `last_success_input/output`으로 regression test 자동 생성.
 6. **Multimodal 입력 / Prompt caching** — 기능 확장 + 비용 최적화. nice-to-have.

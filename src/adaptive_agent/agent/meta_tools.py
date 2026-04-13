@@ -43,14 +43,21 @@ _META_TOOLS: list[dict[str, Any]] = [
                 "description": (
                     "Python 코드를 생성하고 실행합니다. 데이터 처리, 계산, 변환 등 모든 작업에 사용. "
                     "데이터는 explicit input key 로 전달하세요: 파일은 {\"키\": {\"$ref\": \"<path>\"}}, "
-                    "inline 데이터는 literal 값."
+                    "inline 데이터는 literal 값. tool_name 은 의미있는 snake_case 로 반드시 지정."
                 ),
                 "parameters": {
                     "type": "object",
                     "properties": {
+                        "tool_name": {
+                            "type": "string",
+                            "description": (
+                                "생성할 도구의 snake_case 이름. 작업 목적이 드러나도록 작성. "
+                                "예: sales_top5_extractor, csv_revenue_by_region."
+                            ),
+                        },
                         "description": {"type": "string", "description": "생성할 코드의 목적"},
                     },
-                    "required": ["description"],
+                    "required": ["tool_name", "description"],
                     "additionalProperties": True,
                 },
             },

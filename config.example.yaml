@@ -4,7 +4,7 @@ llm:
   temperature: 0.0
   max_tokens: 8192
   num_ctx: 32768                    # Ollama context window. 하드웨어에 맞게 조절.
-  enable_native_tools: true
+  enable_native_tools: false      # native tool calling 이 선호 경로이나 default 모델 이슈 (ADR-004) 로 현재는 prompt-based 기본. 다른 모델 사용 시 true 로 바꿔 enable.
   request_timeout_seconds: 120
   planner_max_tokens: 4096
   planner_timeout_seconds: 90

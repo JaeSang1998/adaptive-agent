@@ -22,7 +22,7 @@ class LLMConfig:
     seed: int = 42
     max_tokens: int = 8192
     num_ctx: int = 32768
-    enable_native_tools: bool = True
+    enable_native_tools: bool = False  # reason: native 가 선호 경로지만 default 모델 (gemma4:26b) 의 multi-turn empty content 이슈로 opt-in (ADR-004). env/config 로 언제든 enable.
     request_timeout_seconds: float = 120.0
     planner_max_tokens: int = 4096
     planner_timeout_seconds: float = 90.0

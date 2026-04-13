@@ -118,6 +118,7 @@ class TestAgentCore:
             json.dumps({
                 "tool": "generate_code",
                 "input": {
+                    "tool_name": "double_number",
                     "description": "숫자를 2배로",
                 },
             }),
@@ -180,6 +181,7 @@ class TestAgentCore:
             json.dumps({
                 "tool": "generate_code",
                 "input": {
+                    "tool_name": "top5_products_writer",
                     "description": "상위 5개 제품을 계산해서 top5.json으로 저장",
                 },
             }),
@@ -220,6 +222,7 @@ class TestAgentCore:
             json.dumps({
                 "tool": "generate_code",
                 "input": {
+                    "tool_name": "users_passthrough",
                     "description": "JSON 사용자 데이터를 그대로 반환",
                     "users": {"$ref": "users.json"},
                 },
@@ -250,6 +253,7 @@ class TestAgentCore:
             json.dumps({
                 "tool": "generate_code",
                 "input": {
+                    "tool_name": "user_status_splitter",
                     "description": "active와 inactive 두 파일로 나눠 저장",
                 },
             }),
@@ -280,6 +284,7 @@ class TestAgentCore:
             json.dumps({
                 "tool": "generate_code",
                 "input": {
+                    "tool_name": "stats_calculator",
                     "description": "평균, 중앙값, 표준편차를 계산해서 stats.json으로 저장",
                 },
             }),
@@ -332,22 +337,6 @@ class TestStuckDetection:
         session.record_action("generate_code", data)
         result = session.record_action("generate_code", data)
         assert result is True
-
-
-class TestAutoName:
-    """_auto_name 단위 테스트."""
-
-    def test_english_description(self):
-        assert AgentCore._auto_name("process data from CSV") == "process_data_from"
-
-    def test_empty_description(self):
-        assert AgentCore._auto_name("") == "tool"
-
-    def test_non_ascii_only(self):
-        assert AgentCore._auto_name("CSV 데이터를 분석") == "csv"
-
-    def test_mixed(self):
-        assert AgentCore._auto_name("filter JSON monsters") == "filter_json_monsters"
 
 
 class TestResolveToolName:

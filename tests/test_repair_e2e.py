@@ -66,13 +66,14 @@ class TestRepairE2E:
             json.dumps({
                 "tool": "generate_code",
                 "input": {
+                    "tool_name": "double_number",
                     "description": "숫자를 2배로",
                 },
             }),
             # 2) Builder: 버그 코드
             BUGGY_CODE,
-            # 3) Planner: repair (도구 이름은 auto_name이 생성)
-            json.dumps({"tool": "repair_tool", "input": {"tool_name": "tool"}}),
+            # 3) Planner: repair (planner가 지정한 tool_name 그대로 사용)
+            json.dumps({"tool": "repair_tool", "input": {"tool_name": "double_number"}}),
             # 4) Repairer: 수정된 코드
             FIXED_CODE,
             # 5) Planner: 텍스트 응답
@@ -88,18 +89,19 @@ class TestRepairE2E:
     def test_repair_uses_original_input(self, tmp_path: Path):
         """repair 시 registry에 기록된 원본 입력 데이터가 사용되는지 검증."""
         responses = [
-            # 1) Planner: generate_code (explicit name 키 전달)
+            # 1) Planner: generate_code (name 은 data 키, tool_name 은 도구 이름)
             json.dumps({
                 "tool": "generate_code",
                 "input": {
+                    "tool_name": "greeter",
                     "description": "인사",
                     "name": "Alice",
                 },
             }),
             # 2) Builder: 버그 코드 (잘못된 키 접근)
             "def run(input: dict) -> dict:\n    return {'msg': 'Hello ' + input['username']}",
-            # 3) Planner: repair (auto_name이 생성한 이름으로)
-            json.dumps({"tool": "repair_tool", "input": {"tool_name": "tool"}}),
+            # 3) Planner: repair (planner가 지정한 tool_name 그대로 사용)
+            json.dumps({"tool": "repair_tool", "input": {"tool_name": "greeter"}}),
             # 4) Repairer: 수정된 코드 (올바른 키 접근)
             "def run(input: dict) -> dict:\n    return {'msg': 'Hello ' + input.get('name', 'World')}",
             # 5) Planner: 텍스트 응답
@@ -118,17 +120,18 @@ class TestRepairE2E:
             json.dumps({
                 "tool": "generate_code",
                 "input": {
+                    "tool_name": "always_fail",
                     "description": "항상 실패",
                 },
             }),
             # 2) Builder: 버그 코드
             always_buggy,
             # 3-8) repair 3회
-            json.dumps({"tool": "repair_tool", "input": {"tool_name": "tool"}}),
+            json.dumps({"tool": "repair_tool", "input": {"tool_name": "always_fail"}}),
             always_buggy,
-            json.dumps({"tool": "repair_tool", "input": {"tool_name": "tool"}}),
+            json.dumps({"tool": "repair_tool", "input": {"tool_name": "always_fail"}}),
             always_buggy,
-            json.dumps({"tool": "repair_tool", "input": {"tool_name": "tool"}}),
+            json.dumps({"tool": "repair_tool", "input": {"tool_name": "always_fail"}}),
             always_buggy,
             # 9) Planner: 포기
             "수정에 실패했습니다.",
@@ -138,5 +141,5 @@ class TestRepairE2E:
         agent._max_repair = 3  # pyright: ignore[reportPrivateUsage]
         agent.handle_user_input("테스트")
 
-        errors = session.get_repair_errors("tool")
+        errors = session.get_repair_errors("always_fail")
         assert len(errors) >= 3

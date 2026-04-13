@@ -420,21 +420,22 @@ class AgentCore:
     def _handle_generate_code(self, data: dict[str, Any]) -> None:
         """코드 생성 + 실행. 성공 시 세션 도구로 등록 → 저장은 _offer_save에서."""
         description = str(data.get("description", ""))
+        tool_name = str(data.get("tool_name", "")).strip()
+        if not tool_name:
+            self._fail(
+                "generate_code",
+                "generate_code 호출 시 tool_name 을 반드시 지정해야 합니다.",
+                recovery=(
+                    "작업 목적이 드러나는 snake_case 이름을 tool_name 키로 추가해서 다시 호출하세요. "
+                    "예: {\"tool\": \"generate_code\", \"input\": {\"tool_name\": \"sales_top5_extractor\", "
+                    "\"description\": \"...\", ...}}"
+                ),
+            )
+            return
         input_data = self._prepare_code_input(data)
 
         self._status("generating_code", {"description": description})
-        self._build_and_run_tool(description, input_data)
-
-    def _find_similar_tool_code(self, description: str) -> str:
-        """현재 세션에서 유사한 description을 가진 도구의 소스 코드 반환."""
-        for _key, info in self._session.temp_tools.items():
-            existing_desc: str = str(info.get("description", ""))
-            if existing_desc and (
-                existing_desc.lower() in description.lower()
-                or description.lower() in existing_desc.lower()
-            ):
-                return str(info.get("code", ""))
-        return ""
+        self._build_and_run_tool(description, input_data, tool_name=tool_name)
 
     def _resolve_tool_name(self, base_name: str) -> str:
         """이름 충돌 시 suffix 자동 부여."""
@@ -446,33 +447,29 @@ class AgentCore:
                 return candidate
         return base_name
 
-    @staticmethod
-    def _auto_name(description: str) -> str:
-        """description에서 도구 이름 자동 생성."""
-        words = description.replace(",", " ").replace(".", " ").split()
-        name_parts = [w.lower() for w in words if w.isascii() and w.isalpha()][:3]
-        return "_".join(name_parts) if name_parts else "tool"
-
     def _build_and_run_tool(
         self,
         description: str,
         input_data: dict[str, Any],
+        *,
+        tool_name: str,
     ) -> None:
         """Builder → Validator → Registry 등록 → Runner 실행."""
+        from adaptive_agent.tools.persistence import ToolPersistence
+
         user_request = self._find_last_user_request()
-        existing_code = self._find_similar_tool_code(description)
 
         build_result = self._builder.build(
             description, user_request,
-            input_data=input_data, existing_code=existing_code,
+            input_data=input_data,
         )
 
         if not build_result.success:
-            self._fail("tool", f"빌드 실패: {build_result.error}",
+            self._fail(tool_name, f"빌드 실패: {build_result.error}",
                        recovery="description을 더 구체적으로 수정하거나 ask_user로 추가 정보를 요청하세요.")
             return
 
-        tool_name = self._auto_name(description)
+        tool_name = ToolPersistence.sanitize_name(tool_name)
         tool_name = self._resolve_tool_name(tool_name)
 
         self._status("creating_tool", {"tool_name": tool_name, "input": input_data})
@@ -605,7 +602,7 @@ class AgentCore:
         명시. `_resolve_refs` 가 _run_step 에서 이미 dehydrate 한 값이 `data` 에 들어옴.
         builder 는 description 을 별도 인자로 받으므로 여기서 제외.
         """
-        return {k: v for k, v in data.items() if k != "description"}
+        return {k: v for k, v in data.items() if k not in ("description", "tool_name")}
 
     @staticmethod
     def _is_visible_workspace_file(path: Path) -> bool:

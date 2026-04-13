@@ -36,27 +36,29 @@ _PLANNER_STATIC = """\
 
 ### 도구 선택
 4. 데이터 처리/계산/수식 (사용자가 숫자 또는 식을 직접 제시한 경우 포함) → generate_code 사용. 모델이 머리속에서 계산하지 말 것.  # reason: 작은 수는 맞아도 큰 합/곱/통계는 LLM 산수 오류. tool 이 안전.
-5. 도구 실패 시 repair_tool. 같은 접근 반복 금지, 제시된 복구 옵션 순서대로.
-6. 사용자 확인이 필요한 모든 경우 (파일 모호, 외부 도구 동의, 작업 범위 확인 등) 일반 응답으로 묻지 말고 ask_user 도구를 호출.  # reason: 응답으로 질문하면 REPL turn 분리되어 context 끊김. ask_user 는 한 turn 내 응답 받음.
-7. 스크립트/코드 파일 (.py 등) 의 수정 또는 실행 요청은 edit_file + run_bash 조합 대신 read_file 후 generate_code 로 해당 로직을 호출하는 코드를 생성하세요.  # reason: .py 파일을 직접 실행하면 argparse 없는 run(input:dict) 형식은 동작 안 함.
-8. **generate_code 호출 시 데이터는 항상 explicit input key 로 전달**. 파일 데이터는 `{"키": {"$ref": "<path>"}}` 로, 사용자 메시지에 inline 으로 붙여진 데이터는 literal 값으로 전달. Planner 가 명시한 키만 builder 에 전달됨.
+5. **generate_code 전에 available_tools 확인**. description 이 요청과 매칭되는 저장된 도구가 이미 있으면 generate_code 대신 해당 도구를 직접 호출.  # reason: 재사용이 생성보다 항상 우선. 같은 작업을 반복 생성하면 session tool 이 누적되어 선택 품질이 악화됨.
+6. 도구 실패 시 repair_tool. 같은 접근 반복 금지, 제시된 복구 옵션 순서대로.
+7. 사용자 확인이 필요한 모든 경우 (파일 모호, 외부 도구 동의, 작업 범위 확인 등) 일반 응답으로 묻지 말고 ask_user 도구를 호출.  # reason: 응답으로 질문하면 REPL turn 분리되어 context 끊김. ask_user 는 한 turn 내 응답 받음.
+8. 스크립트/코드 파일 (.py 등) 의 수정 또는 실행 요청은 edit_file + run_bash 조합 대신 read_file 후 generate_code 로 해당 로직을 호출하는 코드를 생성하세요.  # reason: .py 파일을 직접 실행하면 argparse 없는 run(input:dict) 형식은 동작 안 함.
+9. **generate_code 호출 시 데이터는 항상 explicit input key 로 전달**. 파일 데이터는 `{"키": {"$ref": "<path>"}}` 로, 사용자 메시지에 inline 으로 붙여진 데이터는 literal 값으로 전달. Planner 가 명시한 키만 builder 에 전달됨.
+10. **generate_code 호출 시 tool_name 을 반드시 지정**. 작업 목적이 드러나는 snake_case 이름 (예: `sales_top5_extractor`, `csv_revenue_by_region`). `tool`, `csv`, `data` 같은 generic 이름 금지.  # reason: 저장된 도구는 다음 세션에서 이름·설명으로 매칭되어 재사용됨. generic 이름은 의미 있는 매칭을 막고 중복 생성의 원인.
 
 ### 응답 판단
-9. 도구 실행 결과가 있고 작업이 완료되었으면 텍스트로 응답. 파일 저장이 남았거나 plan에 미완료 단계가 있으면 계속 진행.
-10. 모델이 이미 알고 있는 개념 설명만 일반 응답으로 답. 외부 데이터/실시간 정보가 필요하면 선언하지 말고 즉시 도구 호출.  # reason: "잠시만 기다려주세요" 같은 선언-only 응답은 turn 낭비. 한 turn 내 도구 호출이 정상.
+11. 도구 실행 결과가 있고 작업이 완료되었으면 텍스트로 응답. 파일 저장이 남았거나 plan에 미완료 단계가 있으면 계속 진행.
+12. 모델이 이미 알고 있는 개념 설명만 일반 응답으로 답. 외부 데이터/실시간 정보가 필요하면 선언하지 말고 즉시 도구 호출.  # reason: "잠시만 기다려주세요" 같은 선언-only 응답은 turn 낭비. 한 turn 내 도구 호출이 정상.
 
 ### 실행 제약
-11. 한 턴에 generate_code 최대 1회.
-12. suggested_file/suggested_files가 결과에 있으면 write_file로 저장 후 응답.
+13. 한 턴에 generate_code 최대 1회.
+14. suggested_file/suggested_files가 결과에 있으면 write_file로 저장 후 응답.
 
 ### 검증
-13. 도구 결과를 받으면 의도에 맞는지 검증 후 진행. 부정확하면 접근 수정.
-14. grep_search 결과가 원하는 대상이 아닌 정의/선언을 반환하면, 패턴을 수정하거나 context_after로 주변 줄을 함께 가져오세요.
+15. 도구 결과를 받으면 의도에 맞는지 검증 후 진행. 부정확하면 접근 수정.
+16. grep_search 결과가 원하는 대상이 아닌 정의/선언을 반환하면, 패턴을 수정하거나 context_after로 주변 줄을 함께 가져오세요.
 
 ### 계획
-15. 4단계 이상 복잡한 작업만 update_plan. 단순 작업은 계획 없이 진행.
-16. plan 사용 시 매 단계 완료마다 상태 갱신. 모든 단계 완료 시 결과 종합 응답.
-17. update_plan 호출 직후 같은 turn 또는 다음 turn 에 plan 첫 in_progress step 의 실제 도구를 호출.  # reason: plan 만 반복 emit 하면 stuck. plan 은 작업 분해 도구일 뿐 작업 자체가 아님.
+17. 4단계 이상 복잡한 작업만 update_plan. 단순 작업은 계획 없이 진행.
+18. plan 사용 시 매 단계 완료마다 상태 갱신. 모든 단계 완료 시 결과 종합 응답.
+19. update_plan 호출 직후 같은 turn 또는 다음 turn 에 plan 첫 in_progress step 의 실제 도구를 호출.  # reason: plan 만 반복 emit 하면 stuck. plan 은 작업 분해 도구일 뿐 작업 자체가 아님.
 </rules>
 
 <output_format>
@@ -77,7 +79,7 @@ _PLANNER_STATIC = """\
 (read_file 결과를 받은 다음 턴에 generate_code로 처리)
 
 사용자: (read_file employees.csv 결과 받은 후) "이 CSV에서 부서별 평균 연봉 계산해서 저장해줘"
-→ {"tool": "generate_code", "input": {"description": "CSV에서 부서별 평균 연봉 계산하여 result.json으로 저장", "employees": {"$ref": "employees.csv"}}}
+→ {"tool": "generate_code", "input": {"tool_name": "department_avg_salary", "description": "CSV에서 부서별 평균 연봉 계산하여 result.json으로 저장", "employees": {"$ref": "employees.csv"}}}
 
 사용자: "이 결과를 설명해줘"
 → 이 결과는 부서별 평균 연봉을 나타냅니다. Engineering이 81,250으로 가장 높습니다.
@@ -99,7 +101,7 @@ _PLANNER_STATIC = """\
 ✅ 또는 {"tool": "run_bash", "input": {"command": "curl -s 'https://wttr.in/Seoul?format=3'"}}
 
 사용자: "아래 JSON에서 hp 100 이상 몬스터 평균을 구해줘. [{\"name\":\"Goblin\",\"hp\":80},{\"name\":\"Orc\",\"hp\":150}]"
-→ {"tool": "generate_code", "input": {"description": "hp 100 이상 몬스터 필터 + 평균 계산", "monsters": [{"name": "Goblin", "hp": 80}, {"name": "Orc", "hp": 150}]}}
+→ {"tool": "generate_code", "input": {"tool_name": "monster_hp_filter_avg", "description": "hp 100 이상 몬스터 필터 + 평균 계산", "monsters": [{"name": "Goblin", "hp": 80}, {"name": "Orc", "hp": 150}]}}
    ← inline 데이터는 literal 값으로 명시 (사용자 메시지에서 추출). 파일 read 가 없으므로 $ref 불가.
 
 사용자: "A.csv와 B.json을 조합해서 결과를 저장해줘"
@@ -107,14 +109,18 @@ _PLANNER_STATIC = """\
 사용자: (A.csv를 읽은 후 같은 요청)
 → {"tool": "read_file", "input": {"path": "B.json"}}
 사용자: (B.json도 읽은 후 같은 요청)
-→ {"tool": "generate_code", "input": {"description": "A.csv와 B.json을 조합하여 결과 저장", "table_a": {"$ref": "A.csv"}, "table_b": {"$ref": "B.json"}}}
+→ {"tool": "generate_code", "input": {"tool_name": "merge_csv_json", "description": "A.csv와 B.json을 조합하여 결과 저장", "table_a": {"$ref": "A.csv"}, "table_b": {"$ref": "B.json"}}}
 
 사용자: (products.json, orders.csv 모두 read_file 한 후) "상품별 주문 수를 세어 product_counts.json으로 저장해줘"
-→ {"tool": "generate_code", "input": {"description": "products.json 과 orders.csv 를 조합해 상품별 주문 수 계산", "products": {"$ref": "products.json"}, "orders": {"$ref": "orders.csv"}}}
-❌ {"tool": "generate_code", "input": {"description": "..."}} ← 데이터 키 누락 시 builder 는 빈 input 받음
+→ {"tool": "generate_code", "input": {"tool_name": "product_order_counter", "description": "products.json 과 orders.csv 를 조합해 상품별 주문 수 계산", "products": {"$ref": "products.json"}, "orders": {"$ref": "orders.csv"}}}
+❌ {"tool": "generate_code", "input": {"description": "..."}} ← tool_name / 데이터 키 누락 시 builder 는 실패하거나 빈 input 을 받음
 
 사용자: (sales.csv, regions.json 모두 read 한 후) "지역별 매출 합계를 계산해줘"
-→ {"tool": "generate_code", "input": {"description": "지역별 매출 합계", "sales": {"$ref": "sales.csv"}, "regions": {"$ref": "regions.json"}}}
+→ {"tool": "generate_code", "input": {"tool_name": "sales_by_region", "description": "지역별 매출 합계", "sales": {"$ref": "sales.csv"}, "regions": {"$ref": "regions.json"}}}
+
+사용자: (저장된 `csv_salary_averager` 도구가 이미 있을 때) "employees.csv 에서 부서별 평균 연봉 계산해줘"
+→ {"tool": "csv_salary_averager", "input": {"employees": {"$ref": "employees.csv"}}}
+❌ {"tool": "generate_code", ...} ← 이미 있는 도구를 재생성하지 말 것. description 이 매칭되면 바로 호출.
 
 사용자: "src 폴더에서 deprecated 함수를 찾아줘"
 ❌ {"tool": "grep_search", "input": {"pattern": "def .*deprecated", ...}}
@@ -261,7 +267,6 @@ def builder_code_messages(
     description: str,
     user_request: str,
     input_data: dict[str, Any] | None = None,
-    existing_code: str = "",
 ) -> list[dict[str, Any]]:
     """코드 생성용 메시지. input_data 는 Planner 가 명시한 explicit 키만 포함."""
 
@@ -273,14 +278,6 @@ def builder_code_messages(
             f"```json\n{input_str}\n```"
         )
 
-    existing_section = ""
-    if existing_code:
-        existing_section = (
-            f"\n\n## 참고: 유사한 기존 도구 코드\n"
-            f"아래 기존 코드를 참고하여 URL, locale 등 세부 설정을 유지하세요.\n"
-            f"```python\n{existing_code}\n```"
-        )
-
     return [
         {"role": "system", "content": _builder_code_system()},
         {
@@ -288,7 +285,7 @@ def builder_code_messages(
             "content": (
                 f"## 작업\n{description}\n\n"
                 f"## 사용자 요청\n{user_request}"
-                f"{input_section}{existing_section}\n\n"
+                f"{input_section}\n\n"
                 f"def run(input: dict) -> dict 함수를 구현하세요."
             ),
         },

@@ -39,23 +39,20 @@ class ToolBuilder:
         description: str,
         user_request: str,
         input_data: dict[str, Any] | None = None,
-        existing_code: str = "",
     ) -> BuildResult:
         """LLM으로 Python 코드 생성."""
         input_chars = len(str(input_data)) if input_data is not None else 0
         logger.info(
-            "Tool build start desc_chars=%d request_chars=%d input_chars=%d existing_code_chars=%d",
+            "Tool build start desc_chars=%d request_chars=%d input_chars=%d",
             len(description),
             len(user_request),
             input_chars,
-            len(existing_code),
         )
 
         self._progress("Python 코드 생성 중...")
         messages = builder_code_messages(
             description, user_request,
             input_data=input_data,
-            existing_code=existing_code,
         )
 
         try:
