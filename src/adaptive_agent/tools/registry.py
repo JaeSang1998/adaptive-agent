@@ -38,9 +38,17 @@ class ToolRegistry:
         descs: list[dict[str, Any]] = []
         notices: list[str] = []
 
-        # built-in: 항상 전부 노출
+        # built-in: 항상 전부 노출 (parameters 포함 — native tool calling 에서 정확한 schema 필요)
         for info in self._builtin.values():
-            descs.append({"name": info["name"], "description": info["description"], "tags": info.get("tags", [])})
+            entry: dict[str, Any] = {
+                "name": info["name"],
+                "description": info["description"],
+                "tags": info.get("tags", []),
+            }
+            params = info.get("parameters")
+            if isinstance(params, dict):
+                entry["parameters"] = params
+            descs.append(entry)
 
         # persistent: windowing 적용
         persistent_items = list(self._persistent.items())
