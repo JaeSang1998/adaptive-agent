@@ -658,3 +658,7 @@ main.py → agent/core/__init__.py (AgentCore)
 | 파일시스템 탈출 | cwd=tmpdir + open() AST 차단 | built-in 경유 접근 | nsjail/gVisor |
 | 프롬프트 인젝션 | native: role 분리, fallback: 메시지 규약 | LLM 판단 의존 | input validation |
 | 컨텍스트 폭발 | observation masking (단일 primitive) + runner 30KB / session 12KB cap + observations dict 100 hard cap | 극단적 단일 메시지 | 모델 측 num_ctx 증설 |
+
+---
+
+**테스트 기기**: M5 MAX RAM 128GB
