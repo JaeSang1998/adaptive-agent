@@ -280,7 +280,7 @@ Agent의 모든 의사결정이 LLM 호출에 의존합니다. 호출 안정성(
 <details>
 <summary><b>결과</b></summary>
 
-native 모드에서 도구 결과가 `role: "tool"` + `tool_name`으로 전달, 사용자 메시지와 혼동 0. capability detection은 세션 시작 시 1회만 수행.
+native 모드 (opt-in) 활성 시 도구 결과가 `role: "tool"` + `tool_name`으로 전달, 사용자 메시지와 혼동 0. capability detection은 세션 시작 시 1회만 수행. **현재 default (prompt-based) 에서는 §한계 의 role 오염 참고** — gemma4:26b 의 multi-turn empty content 이슈로 [ADR-004](docs/decisions/004-native-tools-default.md) 에 따라 prompt-based 가 default.
 </details>
 
 <details>
@@ -671,7 +671,7 @@ main.py → agent/core.py
 
 1. **Container 기반 실행** — Docker/nsjail로 cgroup + seccomp 완전 격리. 보안 모델의 잔여 위험 대부분을 해소하는 가장 높은 임팩트 개선.
 2. **pass@k 측정** — 시나리오당 N회 반복 실행으로 통계적 신뢰 확보. 현재 최적화 루프의 가장 큰 약점.
-3. **Builder/Repair에도 native tool calling** — 현재 Planner만 native. Builder/Repair도 전환하면 코드 생성 파싱 실패율 추가 감소. (전제: default 모델의 multi-turn native tool calling stabilize 후 `enable_native_tools=true` 복귀, [ADR-004](docs/decisions/004-native-tools-default.md))
+3. **Builder/Repair 까지 native tool calling 확장** — 현재 모든 phase 가 prompt-based default ([ADR-004](docs/decisions/004-native-tools-default.md)). default 모델 (gemma4:26b) 의 multi-turn empty content 이슈가 stabilize 되거나 모델 교체 후, planner native 복귀와 함께 builder/repair 도 native 로 전환하면 코드 생성 파싱 실패율 추가 감소.
 4. **Embedding 기반 도구 검색** — 도구 수천 개 이상 시 필요. 현재 수백 개 규모에서는 키워드 매칭으로 충분.
 5. **도구 unit test 자동 생성** — `last_success_input/output`으로 regression test 자동 생성.
 6. **Multimodal 입력 / Prompt caching** — 기능 확장 + 비용 최적화. nice-to-have.
