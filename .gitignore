@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+optim/
+
+# Virtual environment
+.venv/
+
+# pytest
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# Config (local overrides)
+config.yaml
+
+# Output files
+*.output.json
+generate_monsters_output.json
+
+# OS
+.DS_Store

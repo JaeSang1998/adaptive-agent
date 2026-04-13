@@ -1,0 +1,20 @@
+llm:
+  base_url: "http://localhost:11434"
+  model: "gemma4:26b"
+  temperature: 0.0
+  max_tokens: 8192
+  num_ctx: 32768                    # Ollama context window. 하드웨어에 맞게 조절.
+  enable_native_tools: true
+  request_timeout_seconds: 120
+  planner_max_tokens: 4096
+  planner_timeout_seconds: 90
+  code_max_tokens: 8192
+  code_timeout_seconds: 120
+  repair_max_tokens: 8192
+  repair_timeout_seconds: 120
+
+execution:
+  max_steps: 15
+  max_repair_attempts: 3
+
+# tools_dir: "~/.adaptive-agent/tools"
