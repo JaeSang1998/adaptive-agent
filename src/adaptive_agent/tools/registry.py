@@ -203,8 +203,9 @@ class ToolRegistry:
 
     def _execute_list_tools(self, input_data: dict[str, Any]) -> ToolResult:
         """저장된 도구 카탈로그 조회. read_file과 동일한 pagination 패턴."""
-        offset = int(input_data.get("offset", 0))
-        limit = int(input_data.get("limit", 20))
+        from adaptive_agent.limits import safe_int
+        offset = safe_int(input_data.get("offset"), 0)
+        limit = safe_int(input_data.get("limit"), 20)
         query = input_data.get("query", "")
 
         results, total = self.get_persistent_catalog(

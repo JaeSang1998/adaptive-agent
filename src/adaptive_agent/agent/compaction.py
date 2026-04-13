@@ -15,10 +15,10 @@ from __future__ import annotations
 from typing import Literal
 
 from adaptive_agent.agent.session import Session
+from adaptive_agent.limits import FIRST_MSG_PRESERVE_CHARS
 
 _TOOL_RESULT_PREFIX = "[도구 "
 _MASKED_BODY = "[결과 생략]"
-_FIRST_MSG_MAX_CHARS = 2000  # 첫 메시지 truncate 한계 (sliding window 시)
 _PLANNER_MAX_MESSAGES = 10
 _DEFAULT_TOKEN_BUDGET = 128_000
 
@@ -85,7 +85,7 @@ def _sliding_window(session: Session, *, keep_recent: int = 6) -> None:
     """최후 수단: 최근 메시지만 남기고 나머지 삭제.
 
     첫 메시지(원본 요청)는 보존하되, token budget 보장을 위해
-    _FIRST_MSG_MAX_CHARS 이상이면 truncate.
+    FIRST_MSG_PRESERVE_CHARS 이상이면 truncate.
     """
     if len(session.messages) <= keep_recent:
         return
@@ -98,8 +98,8 @@ def _sliding_window(session: Session, *, keep_recent: int = 6) -> None:
         return
 
     content = first.get("content", "")
-    if len(content) > _FIRST_MSG_MAX_CHARS:
-        truncated = content[:_FIRST_MSG_MAX_CHARS] + f"\n...[원본 {len(content)}자 중 {_FIRST_MSG_MAX_CHARS}자만 보존]..."
+    if len(content) > FIRST_MSG_PRESERVE_CHARS:
+        truncated = content[:FIRST_MSG_PRESERVE_CHARS] + f"\n...[원본 {len(content)}자 중 {FIRST_MSG_PRESERVE_CHARS}자만 보존]..."
         first = {**first, "content": truncated}
 
     session.messages = [first] + recent

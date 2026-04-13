@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from adaptive_agent.agent.session import ToolResult
+from adaptive_agent.limits import GLOB_MAX_RESULTS, GREP_MAX_RESULTS, WEB_FETCH_MAX_BYTES, safe_int
 from adaptive_agent.tools.errors import ErrorCode, format_error
 
 
@@ -49,15 +50,15 @@ def _read_file(input_data: dict[str, Any]) -> ToolResult:
     if not path.is_file():
         return ToolResult(tool_name="read_file", success=False, error=format_error(ErrorCode.TYPE_MISMATCH, f"파일이 아닙니다: {path}"))
 
-    offset = int(input_data.get("offset", 0))
-    limit = input_data.get("limit")
+    offset = safe_int(input_data.get("offset"), 0)
+    raw_limit = input_data.get("limit")
+    limit: int | None = safe_int(raw_limit, 0) if raw_limit is not None else None
 
     try:
         lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
         total = len(lines)
 
         if limit is not None:
-            limit = int(limit)
             selected = lines[offset:offset + limit]
         else:
             selected = lines[offset:]
@@ -182,17 +183,13 @@ def _glob_search(input_data: dict[str, Any]) -> ToolResult:
         matches = sorted(str(p) for p in root_path.glob(pattern))
         if not matches:
             return ToolResult(tool_name="glob_search", success=True, output="일치하는 파일이 없습니다.")
-        # 최대 100개까지만 반환
-        truncated = matches[:100]
+        truncated = matches[:GLOB_MAX_RESULTS]
         result = "\n".join(truncated)
-        if len(matches) > 100:
-            result += f"\n... 외 {len(matches) - 100}개"
+        if len(matches) > GLOB_MAX_RESULTS:
+            result += f"\n... 외 {len(matches) - GLOB_MAX_RESULTS}개"
         return ToolResult(tool_name="glob_search", success=True, output=result)
     except Exception as e:
         return ToolResult(tool_name="glob_search", success=False, error=format_error(ErrorCode.INTERNAL, "파일 검색 실패", detail=str(e)))
-
-
-_GREP_MAX_RESULTS = 200
 
 
 def _collect_searchable_files(root: Path, file_glob: str) -> list[Path]:
@@ -261,7 +258,7 @@ def _grep_search(input_data: dict[str, Any]) -> ToolResult:
     pattern = input_data.get("pattern", "")
     path_str = input_data.get("path", ".")
     file_glob = input_data.get("file_glob", "*")
-    context_after = int(input_data.get("context_after", 0))
+    context_after = safe_int(input_data.get("context_after"), 0)
 
     if not pattern:
         return ToolResult(tool_name="grep_search", success=False, error=format_error(ErrorCode.MISSING_PARAM, "'pattern' 파라미터가 필요합니다."))
@@ -276,14 +273,14 @@ def _grep_search(input_data: dict[str, Any]) -> ToolResult:
         return ToolResult(tool_name="grep_search", success=False, error=format_error(ErrorCode.VALIDATION_FAILED, f"잘못된 정규식: {e}"))
 
     files = _collect_searchable_files(root, file_glob)
-    results = _search_in_files(files, regex, context_after=context_after, max_results=_GREP_MAX_RESULTS)
+    results = _search_in_files(files, regex, context_after=context_after, max_results=GREP_MAX_RESULTS)
 
     if not results:
         return ToolResult(tool_name="grep_search", success=True, output="일치하는 결과가 없습니다.")
 
     output = "\n".join(results)
-    if len(results) >= _GREP_MAX_RESULTS:
-        output += f"\n... (최대 {_GREP_MAX_RESULTS}개 표시)"
+    if len(results) >= GREP_MAX_RESULTS:
+        output += f"\n... (최대 {GREP_MAX_RESULTS}개 표시)"
     return ToolResult(tool_name="grep_search", success=True, output=output)
 
 
@@ -469,7 +466,7 @@ def _web_fetch(input_data: dict[str, Any]) -> ToolResult:
         quote(parsed.fragment, safe="%"),
     ))
 
-    max_size = 100 * 1024  # 100KB
+    max_size = WEB_FETCH_MAX_BYTES
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
                       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",

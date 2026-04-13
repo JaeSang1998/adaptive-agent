@@ -6,6 +6,12 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
+from adaptive_agent.limits import (
+    SESSION_RESULT_CHARS,
+    SESSION_RESULT_HEAD,
+    SESSION_RESULT_TAIL,
+)
+
 
 @dataclass(frozen=True, slots=True)
 class ToolResult:
@@ -59,18 +65,17 @@ class Session:
             }],
         })
 
-    _MAX_RESULT_LEN = 4000
-
     def add_tool_result(self, result: ToolResult) -> None:
         """도구 실행 결과를 대화 히스토리에 추가. 큰 결과는 truncate."""
         if result.success:
             output = str(result.output or "")
-            if len(output) > self._MAX_RESULT_LEN:
-                omitted = len(output) - 3000
+            if len(output) > SESSION_RESULT_CHARS:
+                kept = SESSION_RESULT_HEAD + SESSION_RESULT_TAIL
+                omitted = len(output) - kept
                 output = (
-                    output[:2000]
+                    output[:SESSION_RESULT_HEAD]
                     + f"\n...[{omitted}자 생략 — read_file의 offset/limit로 부분 읽기하거나 generate_code로 처리하세요]...\n"
-                    + output[-1000:]
+                    + output[-SESSION_RESULT_TAIL:]
                 )
             content = f"[도구 {result.tool_name} 실행 성공]\n{output}"
         else:

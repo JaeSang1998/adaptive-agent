@@ -21,6 +21,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from adaptive_agent.limits import RUNNER_OUTPUT_BYTES, RUNNER_OUTPUT_HEAD, RUNNER_OUTPUT_TAIL
 from adaptive_agent.tools.errors import ErrorCode, format_error
 
 
@@ -135,14 +136,13 @@ class ToolRunner:
                 pass
 
             # 2) display/log 용 truncation 은 별도 변수로 (context rot 방지)
-            _MAX_OUTPUT = 30_000
             display_output = stdout
-            if len(display_output) > _MAX_OUTPUT:
+            if len(display_output) > RUNNER_OUTPUT_BYTES:
                 total = len(display_output)
                 display_output = (
-                    display_output[:20_000]
-                    + f"\n...[출력 {total}자 중 {_MAX_OUTPUT}자만 표시]...\n"
-                    + display_output[-10_000:]
+                    display_output[:RUNNER_OUTPUT_HEAD]
+                    + f"\n...[출력 {total}자 중 {RUNNER_OUTPUT_BYTES}자만 표시]...\n"
+                    + display_output[-RUNNER_OUTPUT_TAIL:]
                 )
 
             if parsed is not None:
